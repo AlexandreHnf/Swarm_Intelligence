@@ -1,3 +1,15 @@
+function readLines(file_path)
+	local f = io.open(file_path, "rb")
+	local all_lines = {}
+	
+	for line in io.lines(file_path) do
+		table.insert(all_lines, line)
+	end
+	return all_lines
+end
+
+all_lines = readLines("simulation_parameters.txt")
+
 
 -- states 
 EXPLORE = "EXPLORE"
@@ -26,18 +38,24 @@ Q = -1 	-- remembers only the last room's quality he visited
 -- door = -1 					-- door that is sensed if there any
 
 -- variables for obstacle avoidance
-MAX_TURN_STEPS = 40
+MAX_TURN_STEPS = tonumber(all_lines[1])
 current_turn_steps = 0
 
 -- variables for go straight behavior
-FWD_STEPS = 50
+FWD_STEPS = tonumber(all_lines[2])
 current_fwd_steps = 0
 
 -- variables for alignment
-MAX_ALIGN_STEPS = 50
+MAX_ALIGN_STEPS = tonumber(all_lines[3])
 current_align_steps = 0
 new_nest = -1 
 finished = false -- when the robot joined the best room
+
+-- forwarding variables
+FWD_VELOCITY = tonumber(all_lines[4])
+ENTER_VELOCITY = tonumber(all_lines[5])
+ROTATE_VELOCITY = tonumber(all_lines[6])
+AVOID_DISTANCE = tonumber(all_lines[7])
 
 -- all leds 
 all_leds_sensed = {}
@@ -113,7 +131,7 @@ function step()
 		end
 		-- if no obstacle and no door sensed nearby
 		if not is_obstacle_sensed and door == -1 then -- go straight forward
-			robot.wheels.set_velocity(15,15)
+			robot.wheels.set_velocity(FWD_VELOCITY,FWD_VELOCITY)
 		end
 		-- if sensed 4 scouts when in the central room
 		if nb_unique_scouts == 4 and new_nest == -1 and not is_in_room then  
@@ -123,7 +141,7 @@ function step()
 
 	-- ================================== AVOID =====================================
 	elseif current_state == AVOID then 
-		robot.wheels.set_velocity(-10,10)	-- ROTATE LEFT
+		robot.wheels.set_velocity(-ROTATE_VELOCITY,ROTATE_VELOCITY)	-- ROTATE LEFT
 		current_turn_steps = current_turn_steps - 1
 		if current_turn_steps <= 0 then
 		   current_state = EXPLORE
@@ -155,7 +173,7 @@ function step()
 	-- ================================== ENTER =====================================
 	elseif current_state == ENTER then 
 		current_fwd_steps = current_fwd_steps - 1
-		robot.wheels.set_velocity(50,50)
+		robot.wheels.set_velocity(ENTER_VELOCITY,ENTER_VELOCITY)
 
 		if current_fwd_steps <= 0 then -- finished forwarding during a nb of steps
 
@@ -264,7 +282,7 @@ function processObstacles() -- checks if there is a obstacle nearby
 	is_obstacle_sensed = false 
 	sort_prox = table.copy(robot.proximity)
 	table.sort(sort_prox, function(a,b) return a.value>b.value end)
-	if sort_prox[1].value > 0.03 and math.abs(sort_prox[1].angle) < math.pi/2
+	if sort_prox[1].value > AVOID_DISTANCE and math.abs(sort_prox[1].angle) < math.pi/2
 		then is_obstacle_sensed = true
 	end
 end
@@ -347,10 +365,10 @@ function get_room_quality() -- returns quality of a room based on ground color a
 	v_o = (nb_objects - 2) / 10 -- object quality within [0,1]
 
 	if is_scout then 
-		log(robot.id .. " Q : " .. (v_f + v_o) / 2)
-		log(robot.id .. " ground: " .. v_f) 
-		log(robot.id .. " nb obj: " .. nb_objects) 
-		log(robot.id .. " obj quality: " .. v_o) 
+		--log(robot.id .. " Q : " .. (v_f + v_o) / 2)
+		--log(robot.id .. " ground: " .. v_f) 
+		--log(robot.id .. " nb obj: " .. nb_objects) 
+		--log(robot.id .. " obj quality: " .. v_o) 
 	end
 	
 	return (v_f + v_o) / 2 -- room quality
