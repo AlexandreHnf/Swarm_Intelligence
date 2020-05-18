@@ -44,8 +44,8 @@
       <!-- <params /> -->
       <!-- If you want to execute ARGoS with a script preloaded, use this syntax
            Note: the preloaded script does not appear in the Lua editor! (that's a TODO) -->
-      <!-- <params /> -->
-      <params script="decision_making5.lua" />
+      <params />
+      <!-- <params script="decision_making5.lua" /> -->
     </lua_controller>
   </controllers>
 
@@ -176,11 +176,11 @@
   <!-- ****************** -->
   <visualization>
 
-    <!-- <qt-opengl lua_editor="true">
+    <qt-opengl lua_editor="true">
       <camera>
         <placement idx="0" position="0.0,0.0,8.0" look_at="0,0,0" lens_focal_length="20" />
       </camera>
-    </qt-opengl> -->
+    </qt-opengl>
 
   </visualization>
 
