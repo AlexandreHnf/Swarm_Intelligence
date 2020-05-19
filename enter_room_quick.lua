@@ -23,12 +23,14 @@ MAX_TURN_STEPS = 40
 current_turn_steps = 0
 
 -- variables for go straight behavior
-FWD_STEPS = 30
+FWD_STEPS = 5
+ENTER_VELOCITY = 300
 current_fwd_steps = 0
 
 -- variables for alignment
 MAX_ALIGN_STEPS = 50
 current_align_steps = 0
+
 
 
 -- function used to copy two tables
@@ -88,7 +90,7 @@ function step()
 
 	elseif current_state == ENTER then 
 		current_fwd_steps = current_fwd_steps - 1
-		robot.wheels.set_velocity(50,50)
+		robot.wheels.set_velocity(ENTER_VELOCITY,ENTER_VELOCITY)
 		if current_fwd_steps <= 0 then -- finished forwarding
 		   current_state = STOP
 		end

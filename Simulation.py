@@ -6,8 +6,8 @@ class Simulation:
 
 	def __init__(self, nb_params):
 		self.nb_params = nb_params
-		self.lower_bounds = [] # a remplir avec les bonnes valeurs 
-		self.upper_bounds = []
+		self.lower_bounds = [0.1] # a remplir avec les bonnes valeurs 
+		self.upper_bounds = [0.3]
 
 	def getLowerBound(self, i):
 		return self.lower_bounds[i]
@@ -24,6 +24,8 @@ class Simulation:
 		Get a random number in the range [lower bound, upper bound]
 		/!\ Float values ?, here int for the moment
 		"""
+		if type(self.lower_bounds[i]) == float:
+			return random.uniform(self.lower_bounds[i], self.upper_bounds[i])
 		return random.randrange(self.lower_bounds[i], self.upper_bounds[i])
 
 	def run_one_simulation(self):

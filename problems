@@ -47,3 +47,5 @@ PROBLEMS :
 - les robots ne se synchronisent pas lorsqu'ils détectent une porte : align et enter => sol = function can_synchronise() qui regarde si il est dans la piece centrale et qu'il y a 4 scouts.
 
 - 2 scouts peuvent se rentrer dedans et se pousser mutuellement et donc jamais atteindre leur room => sol = avoid scouts
+
+- qd un scout est poussé dans une piece, il part en exploration et ca bousille la synchronisation

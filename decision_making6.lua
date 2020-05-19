@@ -1,16 +1,16 @@
 --[[
-Floor color in room 0: 0.573995
-Num objects in room 0: 10 evaluated: 0.8
-Room 0 evaluation: 0.686998
-Floor color in room 1: 0.0222438
-Num objects in room 1: 3 evaluated: 0.1
-Room 1 evaluation: 0.0611219
-Floor color in room 2: 0.286302
-Num objects in room 2: 10 evaluated: 0.8
-Room 2 evaluation: 0.543151
-Floor color in room 3: 0.0847075
-Num objects in room 3: 3 evaluated: 0.1
-Room 3 evaluation: 0.0923537
+Floor color in room 0: 0.359387
+Num objects in room 0: 9 evaluated: 0.7
+Room 0 evaluation: 0.529693
+Floor color in room 1: 0.360845
+Num objects in room 1: 8 evaluated: 0.6
+Room 1 evaluation: 0.480422
+Floor color in room 2: 0.069279
+Num objects in room 2: 7 evaluated: 0.5
+Room 2 evaluation: 0.284639
+Floor color in room 3: 0.97778
+Num objects in room 3: 4 evaluated: 0.2
+Room 3 evaluation: 0.58889
 ]]
 
 
@@ -146,14 +146,14 @@ function step()
 	door = processDoors(nb_led_sensed, all_leds_sensed) --checks if there is a door nearby
 	can_synchro = can_synchronize(leds_counters)
 	is_scout_close = isScoutClose(nb_led_sensed, all_leds_sensed)
-	
+
 
    -- ================================== EXPLORE =====================================
 	if current_state == EXPLORE then
 		if not can_synchro then 
 			if is_obstacle_sensed then 			-- OBSTACLE
 				current_state = AVOID 
-				current_turn_steps = math.random(MAX_TURN_STEPS)
+				current_turn_steps = MAX_TURN_STEPS
 			end
 			if door ~= -1 then 				-- if a door has been sensed
 				current_state = ALIGN
@@ -190,7 +190,7 @@ function step()
 				if door_angle >= -ALIGN_ANGLE and door_angle <= ALIGN_ANGLE then -- aligned
 					current_state = ENTER
 					current_fwd_steps = FWD_STEPS
-					if finished then current_fwd_steps = FWD_STEPS + 30 end --enter deep
+					if finished then current_fwd_steps = FWD_STEPS + 50 end --enter deep
 					-- red, blue, etc..
 				else 
 					robot.wheels.set_velocity(1, -1)
@@ -206,33 +206,68 @@ function step()
 
 	-- ================================== ENTER =====================================
 	elseif current_state == ENTER then 
-		current_fwd_steps = current_fwd_steps - 1
-		robot.wheels.set_velocity(ENTER_VELOCITY,ENTER_VELOCITY)
+		if is_scout_close then 
+			current_state = AVOID 
+			current_turn_steps = MAX_TURN_STEPS
+		else 
+			current_fwd_steps = current_fwd_steps - 1
+			robot.wheels.set_velocity(ENTER_VELOCITY,ENTER_VELOCITY)
 
-		if current_fwd_steps <= 0 then -- finished forwarding during a nb of steps
+			if current_fwd_steps <= 0 then -- finished forwarding during a nb of steps
 
-			-- scout went back to the central room with a quality
-			if is_scout and not is_in_room and Q ~= -1 and not finished then 
-				current_state = SYNCHRO -- wait for all followers to come
-				robot.leds.set_single_color(13, 128, 0, 0) -- brown
-			else  
-				if not is_in_room then  -- in central room
-					-- IF NOT SCOUT AND SENSE 4 SCOUTS : DECIDE 
-					if leds_counters[2] == 4 and new_nest == -1 then 
-						current_state = SYNCHRO -- (for now, go to SLEEP before gathering)
-						robot.leds.set_single_color(13, 255, 255, 255) -- white
-					else	-- if he got blocked and didn't go in a room
-						current_state = EXPLORE
-					end
-				else -- In a room
-					if new_nest ~= -1 and finished then 
-						current_state = STOP -- if entered the final room
-					else 
-						current_state = ROOM -- enter the room
+				-- scout went back to the central room with a quality
+				if is_scout and not is_in_room and Q ~= -1 and not finished then 
+					current_state = SYNCHRO -- wait for all followers to come
+					robot.leds.set_single_color(13, 128, 0, 0) -- brown
+				else  
+					if not is_in_room then  -- in central room
+						-- IF NOT SCOUT AND SENSE 4 SCOUTS : DECIDE 
+						if leds_counters[2] == 4 and new_nest == -1 then 
+							current_state = SYNCHRO -- (for now, go to SLEEP before gathering)
+							robot.leds.set_single_color(13, 255, 255, 255) -- white
+						else	-- if he got blocked and didn't go in a room
+							current_state = EXPLORE
+						end
+					else -- In a room
+						if new_nest ~= -1 and finished then 
+							current_state = STOP -- if entered the final room
+						else 
+							current_state = ROOM -- enter the room
+						end
 					end
 				end
 			end
 		end
+
+	-- elseif current_state == ROOM then 
+	-- 	robot.wheels.set_velocity(0, 0)
+		
+	-- 	if not is_in_room then -- CENTRAL ROOM
+	-- 		-- scout went back to the central room with a quality
+	-- 		if is_scout and not is_in_room and Q ~= -1 and not finished then 
+	-- 			current_state = SYNCHRO -- wait for all followers to come
+	-- 			robot.leds.set_single_color(13, 128, 0, 0) -- brown
+	-- 		elseif not is_scout then
+	-- 		end
+
+	-- 	else  -- one of 4 ROOM
+	-- 		if not is_in_room then  -- in central room
+	-- 			-- IF NOT SCOUT AND SENSE 4 SCOUTS : DECIDE 
+	-- 			if leds_counters[2] == 4 and new_nest == -1 then 
+	-- 				current_state = SYNCHRO -- (for now, go to SLEEP before gathering)
+	-- 				robot.leds.set_single_color(13, 255, 255, 255) -- white
+	-- 			else	-- if he got blocked and didn't go in a room
+	-- 				current_state = EXPLORE
+	-- 			end
+	-- 		else -- In a room
+	-- 			if new_nest ~= -1 and finished then 
+	-- 				current_state = STOP -- if entered the final room
+	-- 			else 
+	-- 				current_state = ROOM -- enter the room
+	-- 			end
+	-- 		end
+	-- 	end
+
 
 	-- ================================== ROOM =====================================
 	elseif current_state == ROOM then 
@@ -308,11 +343,11 @@ end
 
 function isScoutClose(nb_led_sensed, all_leds_sensed)
 	-- checks if a scout is close => we have to avoid it
-	for i = 0, nb_led_sensed do 
+	for i = 1, nb_led_sensed do 
 		led = all_leds_sensed[i].color
 		-- if detects purple, yellow, cyan, light green of brown => scout sensed
 		if is_room_color(led) or (led.red == 128 and led.green == 0 and led.blue == 0) then 
-			if all_leds_sensed[i].distance > AVOID_DISTANCE and all_leds_sensed[i].angle > -0.25 and
+			if all_leds_sensed[i].distance < AVOID_DISTANCE and all_leds_sensed[i].angle > -0.25 and
 				all_leds_sensed[i].angle < 0.25 then 
 				return true 
 			end
@@ -409,6 +444,13 @@ function get_room_quality(leds_counters)
 
 	nb_objects = leds_counters[3] -- nb of green leds close enough
 	v_o = (nb_objects - 2) / 10 -- object quality within [0,1]
+
+	if is_scout then 
+		-- log(robot.id .. " Q : " .. (v_f + v_o) / 2)
+		-- log(robot.id .. " ground: " .. v_f) 
+		-- log(robot.id .. " nb obj: " .. nb_objects) 
+		-- log(robot.id .. " obj quality: " .. v_o)
+	end
 	
 	return (v_f + v_o) / 2 -- room quality
 end
@@ -416,13 +458,21 @@ end
 
 function can_synchronize(leds_counters)
 	-- checks if the robot can synchronize 
-	if not is_in_room and not is_scout then -- if in central room and follower 
-		-- if 4 scouts sensed and has no nest yet 
-		if leds_counters[2] == 4 and new_nest == -1 then 
-			current_state = SYNCHRO
-			robot.leds.set_single_color(13, 255, 255, 255) -- white (signal for others)
-			return true
-		end 
+	if not is_in_room then
+		if not is_scout then -- if in central room and follower 
+			-- if 4 scouts sensed and has no nest yet 
+			if leds_counters[2] == 4 and new_nest == -1 then 
+				current_state = SYNCHRO
+				robot.leds.set_single_color(13, 255, 255, 255) -- white (signal for others)
+				return true
+			end 
+		else 
+			-- if not is_in_room and Q ~= -1 and not finished then 
+			-- 	current_state = SYNCHRO 
+			-- 	robot.leds.set_single_color(13, 128, 0, 0) -- brown
+			-- 	return true 
+			-- end
+		end
 	end
 	return false
 end

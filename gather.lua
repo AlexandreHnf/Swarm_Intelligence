@@ -24,7 +24,8 @@ MAX_TURN_STEPS = 40
 current_turn_steps = 0
 
 -- variables for go straight behavior
-FWD_STEPS = 50
+FWD_STEPS = 10
+ENTER_VELOCITY = 1000 
 current_fwd_steps = 0
 
 -- variables for alignment
@@ -91,7 +92,7 @@ function step()
 	elseif current_state == ENTER then 
 		-- robot.wheels.set_velocity(0,0)
 		current_fwd_steps = current_fwd_steps - 1
-		robot.wheels.set_velocity(40,40)
+		robot.wheels.set_velocity(ENTER_VELOCITY,ENTER_VELOCITY)
 		if current_fwd_steps <= 0 then -- finished forwarding
 		   current_state = STOP
 		end
