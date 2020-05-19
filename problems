@@ -16,7 +16,10 @@ Room 3 evaluation: 0.831532
 
 
 
+TODO REFACTORING LUA :
 
+- Explore, avoid, etc => des fonctions
+- déplacer le contenu de ENTER dans ROOM
 
 
 PROBLEMS : 
@@ -41,4 +44,6 @@ PROBLEMS :
 
 - des fois un scout se fait pousser dans une piece et du coup des types en synchro restent en synchro pdt que les autres ont décidé. => sol : pouvoir se synchro meme en mode explorer , autre sol = avoid scouts
 
--
+- les robots ne se synchronisent pas lorsqu'ils détectent une porte : align et enter => sol = function can_synchronise() qui regarde si il est dans la piece centrale et qu'il y a 4 scouts.
+
+- 2 scouts peuvent se rentrer dedans et se pousser mutuellement et donc jamais atteindre leur room => sol = avoid scouts
