@@ -1,8 +1,15 @@
 import subprocess, shlex
 import time
 import logging, threading
+import math
+
+threads_values = []
 
 def run_one_simulation():
+	"""
+	Run one simulation of argos
+	"""
+	
 	output = subprocess.run(shlex.split("argos3 -c decision-making.argos"), capture_output=True)
 	o = str(output.stdout, "utf-8")
 	nb_steps = o.strip().split("\x1b[0m\x1b[1;32m")[-1].replace("\x1b[0m\n\x1b[0m", "")
@@ -11,6 +18,10 @@ def run_one_simulation():
 
 
 def average_runs(nb_runs):
+	"""
+	Average nb of steps over n simulations without threads
+	"""
+
 	start_time = time.time()
 	tot = 0
 	for i in range(nb_runs):
@@ -25,12 +36,34 @@ def average_runs(nb_runs):
 
 
 def thread_function(name):
+	"""
+	Function executed by a thread : execute one simulation of argos
+	"""
 	logging.info("Thread %s: starting", name)
-	print("nb steps: ", run_one_simulation())
+	nb_steps = run_one_simulation()
+	threads_values[name] = nb_steps
+	# print("nb steps: ", run_one_simulation())
 	logging.info("Thread %s: finishing", name)
 
+def print_threads_results():
+	""" 
+	Show the results obtained by threads
+	"""
+	print("=========== RESULTS : ")
+	nb_failed = 0
+	for i in range(len(threads_values)):
+		if threads_values[i] == 3000:
+			nb_failed += 1
+		print(f"thread {i} : {threads_values[i]} steps")
+	print("=========== AVERAGE : ", sum(threads_values) / len(threads_values))
+	print(f"=========== CONVERGENCE : {len(threads_values) - nb_failed}/{len(threads_values)}, \
+			nb fails: {nb_failed}")
 
 def run_with_threads(nb_threads):
+	"""
+	Run n threads and then show the results
+	"""
+
 	format = "%(asctime)s: %(message)s"
 	logging.basicConfig(format=format, level=logging.INFO,
 						datefmt="%H:%M:%S")
@@ -49,13 +82,23 @@ def run_with_threads(nb_threads):
 		thread.join()
 		logging.info("Main    : thread %d done", index)
 
-	end_time = time.time() - start_time
-	print("time spent {} sec, {} min".format(end_time, round(end_time/60)))
+
+	print_threads_results()
+
+	end_time_sec = time.time() - start_time
+	in_minutes = math.floor(end_time_sec/60)
+	print("=========== Time spent: ")
+	print("{} seconds".format(end_time_sec))
+	print("{} minutes and {} seconds".format(in_minutes, end_time_sec - in_minutes*60))
+
 
 
 if __name__ == "__main__":
 	# nb_runs = 10
 	# average_runs(nb_runs)
+	nb_threads = 10
+	threads_values = [0 for i in range(nb_threads)]
+	run_with_threads(nb_threads)
 
 	
 
