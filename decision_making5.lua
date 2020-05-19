@@ -30,7 +30,7 @@ MAX_TURN_STEPS = 40
 current_turn_steps = 0
 
 -- variables for go straight behavior
-FWD_STEPS = tonumber(all_lines[2])
+FWD_STEPS = 50
 current_fwd_steps = 0
 
 -- variables for alignment

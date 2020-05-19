@@ -30,20 +30,15 @@ def thread_function(name):
 	logging.info("Thread %s: finishing", name)
 
 
-
-if __name__ == "__main__":
-	# nb_runs = 10
-	# average_runs(nb_runs)
-
+def run_with_threads(nb_threads):
 	format = "%(asctime)s: %(message)s"
 	logging.basicConfig(format=format, level=logging.INFO,
 						datefmt="%H:%M:%S")
 
-
 	start_time = time.time()
 
 	threads = list()
-	for index in range(3):
+	for index in range(nb_threads):
 		logging.info("Main    : create and start thread %d.", index)
 		x = threading.Thread(target=thread_function, args=(index,))
 		threads.append(x)
@@ -56,6 +51,13 @@ if __name__ == "__main__":
 
 	end_time = time.time() - start_time
 	print("time spent {} sec, {} min".format(end_time, round(end_time/60)))
+
+
+if __name__ == "__main__":
+	# nb_runs = 10
+	# average_runs(nb_runs)
+
+	
 
 	
 
