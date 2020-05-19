@@ -36,7 +36,6 @@ is_obstacle_sensed = false  -- if an obstacle has been sensed by the robot
 -- is_door_sensed = false  		-- if a door has been sensed by the robot
 is_in_room = false 			-- if a robot entered a room
 
-last_room_visited = -1 	-- color of the last visited room
 Q = -1 	-- remembers only the last room's quality he visited
 -- door = -1 					-- door that is sensed if there any
 
@@ -62,9 +61,6 @@ AVOID_DISTANCE = 0.03
 
 nb_led_sensed = 0
 
--- all leds 
-all_leds_sensed = {}
-
 
 -- function used to copy two tables
 function table.copy(t)
@@ -74,8 +70,6 @@ function table.copy(t)
   	end
  	return t2
 end
-
-
 
 function assign_scout_color(color) 
 	-- assign one of the 4 color room to the scout : purple, yellow, cyan or light green
@@ -109,11 +103,9 @@ function init()
 end
 
 function get_all_leds_sensed(nb_led_sensed)
-	nb_led_sensed = #robot.colored_blob_omnidirectional_camera
 	all_leds = table.copy(robot.colored_blob_omnidirectional_camera)
 	return all_leds
 end
-
 
 function get_leds_counters(all_leds)
 	leds_counters = {}
@@ -146,7 +138,7 @@ function step()
 
 	processObstacles() 			-- checks if there is any obstacle
 	processRoom()				-- checks if a robot is fully in a room
-	door = processDoors()		-- checks if there is a door nearby
+	door = processDoors(nb_led_sensed, all_leds_sensed) --checks if there is a door nearby
 	
    -- ================================== EXPLORE =====================================
 	if current_state == EXPLORE then
@@ -180,14 +172,14 @@ function step()
 	elseif current_state == ALIGN then 
 		if door ~= -1 then -- to check if still sensed, could have moved
 			current_align_steps = current_align_steps - 1
-			door_angle = robot.colored_blob_omnidirectional_camera[door].angle 
+			-- door_angle = robot.colored_blob_omnidirectional_camera[door].angle 
+			door_angle = all_leds_sensed[door].angle
 			-- if aligned with door angle with a margin of -15° and 15°
-			if door_angle >= -0.25 and door_angle <= 0.25 then -- aligned
+			if door_angle >= -0.15 and door_angle <= 0.15 then -- aligned
 				current_state = ENTER
 				current_fwd_steps = FWD_STEPS
 				if finished then current_fwd_steps = FWD_STEPS + 30 end --enter deep
 				-- red, blue, etc..
-				last_room_visited = from_rgb_to_color(robot.colored_blob_omnidirectional_camera[door].color)
 			else 
 				robot.wheels.set_velocity(1, -1)
 			end
@@ -252,12 +244,12 @@ function step()
 		else
 
 			-- the scout senses 3 other scouts and min 13 followers (min 17 in total)
-			if is_scout and leds_counters[2] == 3 and leds_counters[1] > 13 then 
+			if is_scout and leds_counters[2] == 3 and leds_counters[1] > 12 then 
 				current_wiggle_time = Q*100 -- timer proportional to the quality
 				current_state = DECIDE 
 
 			-- the follower senses 4 scouts and min 12 other followers (min 17 in total)
-			elseif not is_scout and leds_counters[2] == 4 and leds_counters[1] > 12 then  
+			elseif not is_scout and leds_counters[2] == 4 and leds_counters[1] > 11 then  
 				current_state = DECIDE
 			end
 		end
@@ -283,7 +275,7 @@ function step()
 
 		elseif not is_scout then		  -- FOLLOWER
 			if leds_counters[2] == 0 then -- only one scout wiggling remaining
-				ult = get_ultimate_room()
+				ult = get_ultimate_room(nb_led_sensed, all_leds_sensed)
 				new_nest = ult[2]
 				if new_nest ~= -1 then -- if the scout hasn't set his color yet
 					robot.leds.set_all_colors(ult[1].red, ult[1].green, ult[1].blue)
@@ -311,6 +303,17 @@ function processObstacles() -- checks if there is a obstacle nearby
 	end
 end
 
+function is_room_color(color) -- yellow, cyan, purple or light green 
+	if (color.red == 200 and color.green == 200 and color.blue == 0) or 
+		(color.red == 0 and color.green == 255 and color.blue == 255) or 
+		(color.red == 100 and color.green == 0 and color.blue == 200) or 
+		(color.red == 100 and color.green == 200 and color.blue == 0) then 
+		return true 
+	end
+	return false
+end 
+
+
 function is_door(led_source)
 	r = led_source.color.red
 	g = led_source.color.green
@@ -323,28 +326,26 @@ function is_door(led_source)
 	return false
 end
 
--- ATTENTION, USILISER DES COPIES DES TABLES
-function processDoors() -- checks if a door has been sensed (close enough)
+function processDoors(nb_led_sensed, all_leds_sensed) 
+	-- checks if a door has been sensed (close enough)
 	if nb_led_sensed > 0 then
-		for i = 1, nb_led_sensed do 
-			led = robot.colored_blob_omnidirectional_camera[i]
-			if is_door(led) then -- if door color has been detected and close enough
-				if found_nest_room(led.color) then 
-					--log("nest found!")
+		for i = 1, nb_led_sensed do
+			if is_door(all_leds_sensed[i]) then -- if door color has been detected and close enough
+				if found_nest_room(all_leds_sensed[i].color) then 
 					return i -- the door index
 				else 
 					if not finished and not is_scout then -- if the robot don't have to gatter to the best room
 						if is_in_room then -- if in room, the distance doesn't matter
 							return i
 						else -- if in central room, choose the closest door
-							if led.distance <= 100 then return i end
+							if all_leds_sensed[i].distance <= 100 then return i end
 						end
 					end
 				end
 			end
 		end
 	end
-	return -1
+	return -1 -- didn't sense any door
 end
 
 function found_nest_room(led) -- checks whether led is the nest color
@@ -379,19 +380,13 @@ function get_room_quality(leds_counters)
 
 	nb_objects = leds_counters[3] -- nb of green leds close enough
 	v_o = (nb_objects - 2) / 10 -- object quality within [0,1]
-
-	if is_scout then 
-		-- log(robot.id .. " Q : " .. (v_f + v_o) / 2)
-		-- log(robot.id .. " ground: " .. v_f) 
-		-- log(robot.id .. " nb obj: " .. nb_objects) 
-		-- log(robot.id .. " obj quality: " .. v_o) 
-	end
 	
 	return (v_f + v_o) / 2 -- room quality
 end
 
 
 function from_rgb_to_color(led)
+	-- from rgb color (door or room color) to their respective color names
 	r = led.red
 	g = led.green
 	b = led.blue
@@ -408,6 +403,7 @@ function from_rgb_to_color(led)
 end
 
 function from_color_to_rgb(color)
+	-- from door or room color to their respective rgb color
 	if color == "red" then return {255, 0, 0} -- red
 	elseif color == "orange" then return {255, 140, 0} -- orange
 	elseif color == "blue" then return {0, 0, 255} -- blue
@@ -421,6 +417,7 @@ end
 
 
 function map_doors_colors(color)
+	-- from room color to rgb door color
 	if color == "purple" then return {255, 0, 0} -- red
 	elseif color == "yellow" then return {255, 140, 0} -- orange
 	elseif color == "cyan" then return {0, 0, 255} -- blue
@@ -428,22 +425,11 @@ function map_doors_colors(color)
 	end
 end
 
-function is_room_color(color) -- yellow, cyan, purple or light green 
-	if (color.red == 200 and color.green == 200 and color.blue == 0) or 
-		(color.red == 0 and color.green == 255 and color.blue == 255) or 
-		(color.red == 100 and color.green == 0 and color.blue == 200) or 
-		(color.red == 100 and color.green == 200 and color.blue == 0) then 
-		return true 
-	end
-	return false
-end 
-
-function get_ultimate_room() -- get the final room color 
+function get_ultimate_room(nb_led_sensed, all_leds_sensed) -- get the final room color 
 	for i = 1, nb_led_sensed do 
-		led = robot.colored_blob_omnidirectional_camera[i].color
 
-		if is_room_color(led) then  -- yellow, cyan, purple or light green
-			return {led, from_rgb_to_color(led)}
+		if is_room_color(all_leds_sensed[i].color) then  -- yellow, cyan, purple or light green
+			return {all_leds_sensed[i].color, from_rgb_to_color(all_leds_sensed[i].color)}
 		end
 	end
 	return -1
@@ -454,7 +440,6 @@ function reset()
 	current_state = EXPLORE
 	   
 	is_obstacle_sensed = false
-	-- is_door_sensed = false
 	is_scout = false
 	same_room_scout_sensed = false
 	is_in_room = false
@@ -463,13 +448,9 @@ function reset()
 	Q = -1 -- quality memory
 
 	current_turn_steps = 0
-	number_robot_sensed = 0
 	current_fwd_steps = 0
 
 	new_nest = -1
-	last_room_visited = -1
-
-	all_leds_sensed = {}
 
 	assign_scouts()
 	robot.colored_blob_omnidirectional_camera.enable() -- enable LED detection
