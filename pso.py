@@ -26,7 +26,7 @@ class ParticleSwarmOpti:
 
 		# particle swarm
 		self.swarm = [] # list of Particles
-		self.best_particle = Particle() # ATTENTION ICI PAS DE PARAM? FAUT CHANGER DS PARTICLE
+		self.best_particle = None # ATTENTION ICI PAS DE PARAM? FAUT CHANGER DS PARTICLE
 
 		self.global_best_sol = Solution()
 		self.best_timing = BIG_NUMBER # value of the best solution found
@@ -44,14 +44,14 @@ class ParticleSwarmOpti:
 	def printParameters(self):
 		print("Particle Swarm Optimization")
 		print("Parameters: ")
-		print("nb params : ", self.n)
+		print("nb params : ", self.size)
 		print("nb particles: ", self.nb_particles)
 		print("neighbours topology", "G best neighbourhood")
 		print("nb iterations: ", self.max_iterations)
 		print("inertia : ", self.inertia)
 		print("phi 1: ", self.phi_1)
 		print("phi 2: ", self.phi_2)
-		print("seed: ", seed)
+		print("seed: ", self.seed)
 
 	
 	def createGbestTopology(self):
@@ -63,13 +63,11 @@ class ParticleSwarmOpti:
 	
 	def initialize(self):
 		# initialize global best
-		self.global_best_sol = []
-		for i in range(self.size):
-			self.global_best_sol.setValue(i, 0)
+		self.global_best_sol.initZeros(self.size)
 		self.global_best_sol.setEval(BIG_NUMBER)
 
 	
-	def updateGlobalBest(new_x, new_eval):
+	def updateGlobalBest(self, new_x, new_eval):
 		self.global_best_sol.setValues(new_x)
 		self.global_best_sol.setEval(new_eval)
 
@@ -91,9 +89,10 @@ class ParticleSwarmOpti:
 
 			if (self.swarm[i].getPbestEvaluation() < self.global_best_sol.getEval()):
 				self.updateGlobalBest(self.swarm[i].getPbestPosition(), self.swarm[i].getPbestEvaluation())
+				self.best_particle = self.swarm[i]
 		
 		if (prev_eval > self.global_best_sol.getEval()):
-		print(f"New best solution {self.global_best_sol.getEval()} found at iteration {self.iterations}")
+			print(f"New best solution {self.global_best_sol.getEval()} found at iteration {self.iterations}")
 
 
 	def terminateCondition(self):
@@ -113,7 +112,7 @@ class ParticleSwarmOpti:
 			self.swarm.append(p)
 			
 			if (self.global_best_sol.getEval() > p.getPbestEvaluation()):
-				self.updateGlobalBest(p.getPbestPosition(), p.getPbestEvaluation)
+				self.updateGlobalBest(p.getPbestPosition(), p.getPbestEvaluation())
 				self.best_particle = p 
 
 		self.createGbestTopology()
@@ -121,8 +120,8 @@ class ParticleSwarmOpti:
 
 
 def main():
-	nb_params = 7
-	nb_particles = 10
+	nb_params = 4
+	nb_particles = 5
 	nb_it = 10
 	nb_eval = 0
 	nb_run = 1
@@ -155,5 +154,5 @@ def main():
 
 
 
-if __name__ == __main__:
+if __name__ == "__main__":
 	main()

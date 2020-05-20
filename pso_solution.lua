@@ -38,24 +38,27 @@ Q = -1 	-- remembers only the last room's quality he visited
 -- door = -1 					-- door that is sensed if there any
 
 -- variables for obstacle avoidance
-MAX_TURN_STEPS = tonumber(all_lines[1])
+MAX_TURN_STEPS = 40
 current_turn_steps = 0
 
 -- variables for go straight behavior
-FWD_STEPS = tonumber(all_lines[2])
+FWD_STEPS = 50
 current_fwd_steps = 0
 
 -- variables for alignment
-MAX_ALIGN_STEPS = tonumber(all_lines[3])
+ALIGN_ANGLE = tonumber(all_lines[1])
+MAX_ALIGN_STEPS = 50
 current_align_steps = 0
 new_nest = -1 
 finished = false -- when the robot joined the best room
 
 -- forwarding variables
-FWD_VELOCITY = tonumber(all_lines[4])
-ENTER_VELOCITY = tonumber(all_lines[5])
-ROTATE_VELOCITY = tonumber(all_lines[6])
-AVOID_DISTANCE = tonumber(all_lines[7])
+FWD_VELOCITY = 15
+ENTER_VELOCITY = 50
+DEEP_VELOCITY = tonumber(all_lines[2]) -- enter velocity when gathering
+AVOID_DISTANCE = tonumber(all_lines[3])
+ROTATE_VELOCITY = tonumber(all_lines[4])
+
 
 -- all leds 
 all_leds_sensed = {}

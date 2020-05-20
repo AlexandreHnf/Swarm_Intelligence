@@ -3,8 +3,9 @@ from Solution import Solution
 import Utils 
 
 
+
 class Particle:
-	def __init__(self, simulation, phi_1, phi_2, inertia):
+	def __init__(self, simulation=None, phi_1=1, phi_2=1, inertia=1):
 
 		self.simulation = simulation # optim
 		self.current = Solution()
@@ -14,32 +15,40 @@ class Particle:
 		self.phi_1 = phi_1
 		self.phi_2 = phi_2
 		self.inertia = inertia
-		self.velocity = [] # size = nb param simulation
+		self.velocity = []  # size = nb param simulation
 
 		self.neighbours = [] # list of neighbours particles
 		self.init = True
 
+		self.initSolutions()
 		self.initializeUniform()
 
+	def initSolutions(self):
+		self.current.initZeros(self.size)
+		self.pbest.initZeros(self.size)
+		self.gbest.initZeros(self.size)
+
+
 	def initializeUniform(self):
-
-		self.current.init_random()
-		self.pbest.setValues(self.current.getValues())
+		
 		for i in range(self.size):
-			self.velocity[i] = 0
-
+			# self.current.setValue(i, self.simulation.getRandomX(i))
+			self.velocity.append(0)
+		
+		self.current.initRandom(self.size, self.simulation)
+		self.pbest.setValues(self.current.getValues())
 		self.evaluateSolution()
+		# print("new eval : ", self.current.getEval())
 
 	def move(self):
 		self.findGbestParticle() # the global best depends on the topology
-
 
 		for i in range(self.size):
 			u1 = Utils.getRandom01() # random value for the personal component
 			u2 = Utils.getRandom01() # random value for the social component
 
 			inertia = self.inertia * self.velocity[i]
-			cognitive_influence = self.phi1 * u1 * (self.pbest.getValue(i) - self.current.getValue(i))
+			cognitive_influence = self.phi_1 * u1 * (self.pbest.getValue(i) - self.current.getValue(i))
 			social_influence = self.phi_2 * u2 * (self.gbest.getValue(i) - self.current.getValue(i))
 
 			self.velocity[i] = (inertia) + (cognitive_influence) + (social_influence)
@@ -57,13 +66,15 @@ class Particle:
 		""" 
 		If the new solution is better than the personal best, update it
 		"""
-		self.current.setEval(self.simulation.evaluate(self.current.getValues()))
+		new_eval = self.simulation.evaluate(self.current.getValues())
+		# print("new eval : ", new_eval)
+		self.current.setEval(new_eval)
 		if (self.current.getEval() < self.pbest.getEval()):
 			self.pbest.setValues(self.current.getValues())	
 			self.pbest.setEval(self.current.getEval())
 
 
-	def findGBestParticle(self):
+	def findGbestParticle(self):
 		"""
 		Check the neighbourhood for the best particle
 		""" 
@@ -74,12 +85,12 @@ class Particle:
 
 		aux_eval = self.gbest.getEval()
 		for i in range(len(self.neighbours)):
-			if (aux_eval > self.neighbours[i].getPBestEvaluation()):
+			if (aux_eval > self.neighbours[i].getPbestEvaluation()):
 				best = i 
 		
 		if best != -1 :
 			self.updateGbestParticle(self.neighbours[best].getPbestPosition(),
-									 self.neighbours[best].getPBestEvaluation())
+									 self.neighbours[best].getPbestEvaluation())
 
 
 	def updateGbestParticle(self, x, new_eval):
@@ -97,10 +108,10 @@ class Particle:
 	def getPbestPosition(self):
 		return self.pbest.getValues()
 
-	def getPBestEvaluation(self):
+	def getPbestEvaluation(self):
 		return self.pbest.getEval()
 
-	def addNeighbor(self, particle):
+	def addNeighbour(self, particle):
 		""" 
 		Add a new particle to the list of neighbours
 		"""

@@ -1,13 +1,16 @@
 import subprocess, shlex
+import logging, threading
 import time
 import random
+import math 
 
 class Simulation:
 
 	def __init__(self, nb_params):
 		self.nb_params = nb_params
-		self.lower_bounds = [0.1] # a remplir avec les bonnes valeurs 
-		self.upper_bounds = [0.3]
+		self.lower_bounds = [0.1, 80, 0.001, 1] # a remplir avec les bonnes valeurs 
+		self.upper_bounds = [0.3, 1000, 0.05, 30]
+		self.threads_values = []
 
 	def getLowerBound(self, i):
 		return self.lower_bounds[i]
@@ -40,20 +43,62 @@ class Simulation:
 
 		return int(nb_steps)
 
-	def average_runs(self, nb_runs):
+
+	def thread_function(self, name):
+		"""
+		Function executed by a thread : execute one simulation of argos
+		"""
+		logging.info("Thread %s: starting", name)
+		nb_steps = self.run_one_simulation()
+		self.threads_values[name] = nb_steps
+		# print("nb steps: ", run_one_simulation())
+		logging.info("Thread %s: finishing", name)
+
+	def print_threads_results(self):
+		""" 
+		Show the results obtained by threads
+		"""
+		print("=========== RESULTS : ")
+		nb_failed = 0
+		for i in range(len(self.threads_values)):
+			if self.threads_values[i] == 3000:
+				nb_failed += 1
+			print(f"thread {i} : {self.threads_values[i]} steps")
+		print("=========== AVERAGE : ", sum(self.threads_values) / len(self.threads_values))
+		print(f"=========== CONVERGENCE : {len(self.threads_values) - nb_failed}/{len(self.threads_values)}, \
+				nb fails: {nb_failed}")
+
+	def run_with_threads(self, nb_threads):
+		"""
+		Run n threads and then show the results
+		"""
+
+		format = "%(asctime)s: %(message)s"
+		logging.basicConfig(format=format, level=logging.INFO,
+							datefmt="%H:%M:%S")
+
 		start_time = time.time()
-		tot = 0
-		for i in range(nb_runs):
-			nb_steps = run_one_simulation() 
-			tot += nb_steps 
-			print(f"{i}, nb of steps : {nb_steps}")
-		
-		average = tot / nb_runs
 
-		# print(f"average nb of steps on {nb_runs} = {average}")
-		# print(f"done in {time.time() - start_time}")
+		threads = list()
+		for index in range(nb_threads):
+			logging.info("Main    : create and start thread %d.", index)
+			x = threading.Thread(target=self.thread_function, args=(index,))
+			threads.append(x)
+			x.start()
 
-		return average
+		for index, thread in enumerate(threads):
+			logging.info("Main    : before joining thread %d.", index)
+			thread.join()
+			logging.info("Main    : thread %d done", index)
+
+		print_threads_results()
+
+		end_time_sec = time.time() - start_time
+		in_minutes = math.floor(end_time_sec/60)
+		print("=========== Time spent: ")
+		print("{} seconds".format(end_time_sec))
+		print("{} minutes and {} seconds".format(in_minutes, end_time_sec - in_minutes*60))
+
 
 	def write_to_file(self, solution):
 		""" 
@@ -61,7 +106,8 @@ class Simulation:
 		objective function
 		"""
 		with open("simulation_parameters.txt", "w") as params_file:
-			for p in solution.get_x():
+			print(solution)
+			for p in solution:
 				params_file.write("{}\n".format(p))
 
 
@@ -75,4 +121,5 @@ class Simulation:
 		self.write_to_file(solution)
 		
 		# return self.average_runs(10)
-		return self.run_one_simulation()
+		# return self.run_one_simulation()
+		return self.run_with_threads(10)

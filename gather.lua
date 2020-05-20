@@ -24,9 +24,12 @@ MAX_TURN_STEPS = 40
 current_turn_steps = 0
 
 -- variables for go straight behavior
-FWD_STEPS = 10
-ENTER_VELOCITY = 1000 
+FWD_STEPS = 40
+ENTER_VELOCITY = 1000
 current_fwd_steps = 0
+TURN_VELOCITY = 30
+DOOR_ANGLE = 0.2
+
 
 -- variables for alignment
 MAX_ALIGN_STEPS = 50
@@ -79,11 +82,11 @@ function step()
 		if door ~= -1 then -- to check if still sensed, could have moved
 			current_align_steps = current_align_steps - 1
 			door_angle = robot.colored_blob_omnidirectional_camera[door].angle 
-			if door_angle >= -0.30 and door_angle <= 0.30 then -- aligned
+			if door_angle >= -DOOR_ANGLE and door_angle <= DOOR_ANGLE then -- aligned
 				current_state = ENTER
 				current_fwd_steps = FWD_STEPS
 			else 
-				robot.wheels.set_velocity(1, -1)
+				robot.wheels.set_velocity(TURN_VELOCITY, -TURN_VELOCITY)
 			end
 			if current_align_steps <= 0 then current_state = EXPLORE end
 		else current_state = EXPLORE -- if no door sensed anymore

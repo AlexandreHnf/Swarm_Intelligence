@@ -49,3 +49,5 @@ PROBLEMS :
 - 2 scouts peuvent se rentrer dedans et se pousser mutuellement et donc jamais atteindre leur room => sol = avoid scouts
 
 - qd un scout est poussé dans une piece, il part en exploration et ca bousille la synchronisation
+
+- qd un scout est poussé dans une piece qui ne lui est pas destinée, il a la mauvaise qualité ou ne revient pas. 
