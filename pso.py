@@ -104,7 +104,7 @@ class ParticleSwarmOpti:
 
 
 	def terminateCondition(self):
-		if (self.max_iterations != 0 and self.iteration > self.max_iterations):
+		if (self.max_iterations != 0 and self.iteration >= self.max_iterations):
 			return True 
 		if (self.max_evaluations != 0 and self.evaluations > self.max_evaluations):
 			return True 
@@ -115,7 +115,7 @@ class ParticleSwarmOpti:
 		print("Creating swarm..")
 		for i in range(self.nb_particles):
 			p = Particle(i+1, self.simulation, self.phi_1, self.phi_2, self.inertia)
-			print(f"Particle {i} evaluation: {p.getPbestEvaluation()}")
+			print(f"Particle {i+1} evaluation: {p.getPbestEvaluation()}")
 
 			self.swarm.append(p)
 			
@@ -130,7 +130,7 @@ def saveBestSol(sol, evaluation):
 	with open("best_sol_found.txt", "a+") as sol_file:
 		s = "{}, {}, {}, {} => {}\n".format(sol[0], sol[1], sol[2], sol[3], evaluation)
 		sol_file.write(s)
-		sol_file.write("===================================")
+		sol_file.write("===================================\n")
 
 def runOnePSO(nb_params, nb_particles, nb_it, nb_eval, seed, phi1, phi2, inertia):
 	pso = ParticleSwarmOpti(nb_it, nb_eval, nb_params, seed, nb_particles, inertia, phi1, phi2)
@@ -149,7 +149,7 @@ def runOnePSO(nb_params, nb_particles, nb_it, nb_eval, seed, phi1, phi2, inertia
 
 def runMultiplePSO(nb_run):
 	nb_params = 4
-	nb_particles = 5
+	nb_particles = 3
 	nb_it = 5
 	nb_eval = 0
 	seed = 54321
@@ -167,6 +167,10 @@ def runMultiplePSO(nb_run):
 		print("Time spent: {} seconds = {} minutes".format(end_time, round(end_time/60)))
 
 		saveBestSol(best_sol, best_eval)
+
+
+# ==============================================================================
+
 
 def main():
 	runMultiplePSO(1)

@@ -16,7 +16,7 @@ class Simulation:
 
 	def __init__(self, nb_params):
 		self.nb_params = nb_params
-		self.lower_bounds = [50, 1, 0.1, 0.01] # a remplir avec les bonnes valeurs 
+		self.lower_bounds = [50, 1, 0.1, 0.01] 
 		self.upper_bounds = [1000, 30, 0.5, 0.1]
 		self.threads_values = []
 		self.convergence_limit = 1000 # nb of steps max of a simulation
@@ -49,10 +49,11 @@ class Simulation:
 		o = str(output.stdout, encoding)
 		nb_steps = o.strip().split("\x1b[0m\x1b[1;32m")[-1].replace("\x1b[0m\n\x1b[0m", "")
 
-		try:
-			r = int(nb_steps)
-		except:
-			print(o)
+		# try:
+		# 	return int(nb_steps) # /!\ ValueError: invalid literal for int() with base 10: ''
+		# except:
+		# 	print(o)
+		# print("coupable: ", nb_steps)
 		return int(nb_steps) # /!\ ValueError: invalid literal for int() with base 10: ''
 
 

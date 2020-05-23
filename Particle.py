@@ -68,6 +68,7 @@ class Particle:
 		""" 
 		If the new solution is better than the personal best, update it
 		"""
+		print("current sol = ", self.current.getValues())
 		new_eval = self.simulation.evaluate(self.current.getValues())
 		# print("new eval : ", new_eval)
 		self.current.setEval(new_eval)
@@ -97,7 +98,7 @@ class Particle:
 
 	def updateGbestParticle(self, x, new_eval):
 
-		self.pbest.setValues(x)
+		self.gbest.setValues(x)
 		self.gbest.setEval(new_eval)
 
 

@@ -384,10 +384,10 @@ function get_room_quality(leds_counters)
 	v_o = (nb_objects - 2) / 10 -- object quality within [0,1]
 
 	if is_scout then 
-		log(robot.id .. " Q : " .. (v_f + v_o) / 2)
-		log(robot.id .. " ground: " .. v_f) 
-		log(robot.id .. " nb obj: " .. nb_objects) 
-		log(robot.id .. " obj quality: " .. v_o)
+		-- log(robot.id .. " Q : " .. (v_f + v_o) / 2)
+		-- log(robot.id .. " ground: " .. v_f) 
+		-- log(robot.id .. " nb obj: " .. nb_objects) 
+		-- log(robot.id .. " obj quality: " .. v_o)
 	end
 	
 	return (v_f + v_o) / 2 -- room quality

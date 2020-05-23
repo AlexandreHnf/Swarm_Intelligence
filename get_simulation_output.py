@@ -96,7 +96,7 @@ def run_with_threads(nb_threads):
 if __name__ == "__main__":
 	# nb_runs = 10
 	# average_runs(nb_runs)
-	nb_threads = 5
+	nb_threads = 10
 	threads_values = [0 for i in range(nb_threads)]
 	run_with_threads(nb_threads)
 
