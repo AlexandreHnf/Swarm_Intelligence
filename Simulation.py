@@ -4,20 +4,28 @@ import time
 import random
 import math 
 
+"""
+ENTER_VELOCITY = [50; 1000]
+FWD_VELOCITT = [1; 15] => pas encore
+ROTATE_VELOCITY = [1; 30]
+ALIGN_ANGLE = [0.1; 0.5]
+AVOID_DISTANCE = [0.01; 0.1]
+"""
+
 class Simulation:
 
 	def __init__(self, nb_params):
 		self.nb_params = nb_params
-		self.lower_bounds = [0.1, 80, 0.001, 1] # a remplir avec les bonnes valeurs 
-		self.upper_bounds = [0.3, 1000, 0.05, 30]
+		self.lower_bounds = [50, 1, 0.1, 0.01] # a remplir avec les bonnes valeurs 
+		self.upper_bounds = [1000, 30, 0.5, 0.1]
 		self.threads_values = []
+		self.convergence_limit = 1000 # nb of steps max of a simulation
 
 	def getLowerBound(self, i):
 		return self.lower_bounds[i]
 
 	def getUpperBound(self, i):
 		return self.upper_bounds[i]
-
 
 	def get_nb_params(self):
 		return self.nb_params
@@ -41,18 +49,20 @@ class Simulation:
 		o = str(output.stdout, encoding)
 		nb_steps = o.strip().split("\x1b[0m\x1b[1;32m")[-1].replace("\x1b[0m\n\x1b[0m", "")
 
-		return int(nb_steps)
+		if nb_steps == "":
+			print(o)
+		return int(nb_steps) # /!\ ValueError: invalid literal for int() with base 10: ''
 
 
 	def thread_function(self, name):
 		"""
 		Function executed by a thread : execute one simulation of argos
 		"""
-		logging.info("Thread %s: starting", name)
+		#logging.info("Thread %s: starting", name)
 		nb_steps = self.run_one_simulation()
 		self.threads_values[name] = nb_steps
 		# print("nb steps: ", run_one_simulation())
-		logging.info("Thread %s: finishing", name)
+		#logging.info("Thread %s: finishing", name)
 
 	def print_threads_results(self):
 		""" 
@@ -61,7 +71,7 @@ class Simulation:
 		print("=========== RESULTS : ")
 		nb_failed = 0
 		for i in range(len(self.threads_values)):
-			if self.threads_values[i] == 3000:
+			if self.threads_values[i] == self.convergence_limit:
 				nb_failed += 1
 			print(f"thread {i} : {self.threads_values[i]} steps")
 		print("=========== AVERAGE : ", sum(self.threads_values) / len(self.threads_values))
@@ -70,7 +80,7 @@ class Simulation:
 
 	def run_with_threads(self, nb_threads):
 		"""
-		Run n threads and then show the results
+		Run n threads and then show the results (average nb of steps over n simulations)
 		"""
 
 		format = "%(asctime)s: %(message)s"
@@ -81,23 +91,25 @@ class Simulation:
 
 		threads = list()
 		for index in range(nb_threads):
-			logging.info("Main    : create and start thread %d.", index)
+			# logging.info("Main    : create and start thread %d.", index)
 			x = threading.Thread(target=self.thread_function, args=(index,))
 			threads.append(x)
 			x.start()
 
 		for index, thread in enumerate(threads):
-			logging.info("Main    : before joining thread %d.", index)
+			# logging.info("Main    : before joining thread %d.", index)
 			thread.join()
-			logging.info("Main    : thread %d done", index)
+			# logging.info("Main    : thread %d done", index)
 
-		print_threads_results()
+		# self.print_threads_results()
 
 		end_time_sec = time.time() - start_time
 		in_minutes = math.floor(end_time_sec/60)
-		print("=========== Time spent: ")
-		print("{} seconds".format(end_time_sec))
-		print("{} minutes and {} seconds".format(in_minutes, end_time_sec - in_minutes*60))
+		# print("=========== Time spent: ")
+		# print("{} seconds".format(end_time_sec))
+		# print("{} minutes and {} seconds".format(in_minutes, end_time_sec - in_minutes*60))
+
+		return int(sum(self.threads_values) / len(self.threads_values)) # average nb steps
 
 
 	def write_to_file(self, solution):
@@ -106,7 +118,7 @@ class Simulation:
 		objective function
 		"""
 		with open("simulation_parameters.txt", "w") as params_file:
-			print(solution)
+			# print(solution)
 			for p in solution:
 				params_file.write("{}\n".format(p))
 
@@ -118,8 +130,11 @@ class Simulation:
 		and returns the nb of steps
 		"""
 
+		nb_threads = 5
+		self.threads_values = [0 for _ in range(nb_threads)]
+
 		self.write_to_file(solution)
 		
 		# return self.average_runs(10)
 		# return self.run_one_simulation()
-		return self.run_with_threads(10)
+		return self.run_with_threads(nb_threads)

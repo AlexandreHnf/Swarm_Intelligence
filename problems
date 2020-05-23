@@ -51,3 +51,10 @@ PROBLEMS :
 - qd un scout est poussé dans une piece, il part en exploration et ca bousille la synchronisation
 
 - qd un scout est poussé dans une piece qui ne lui est pas destinée, il a la mauvaise qualité ou ne revient pas. 
+
+----------------------- REASONS 
+
+- pq que 4 scouts ? Pcq sinon la synchronisation ne peut pas se faire convenablement => qd est-ce que les followers entrent en synchro ? c'est flou avec n scouts. et ca rajouterait + de steps mais ca pourrait fonctionner si on connait le nb de scouts
+
+- pq les followers n'entrent pas dans les pieces ? Pcq ca instaure trop d'aléatoire et certain followers peuvent pousser les scouts ou s'agglutiner aux portes mais ca peut marcher, mais pb de convergence 
+

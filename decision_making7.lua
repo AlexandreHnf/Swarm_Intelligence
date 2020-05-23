@@ -1,3 +1,10 @@
+--[[
+154.58464871178637
+10
+0.35960096982549
+0.012310548395787484
+]]
+
 -- states 
 EXPLORE = "EXPLORE"
 AVOID = "AVOID"
@@ -25,6 +32,7 @@ FWD_STEPS = 50
 current_fwd_steps = 0
 FWD_VELOCITY = 10
 ENTER_VELOCITY = 50
+ENTER_DEEP_VELOCITY = 154.58464871178637
 
 -- variables for alignment
 MAX_ALIGN_STEPS = 50
@@ -35,8 +43,8 @@ ROTATE_VELOCITY = 10
 new_nest = -1 
 finished = false -- when the robot joined the best room
 
-AVOID_DISTANCE = 0.03
-ALIGN_ANGLE = 0.15
+AVOID_DISTANCE = 0.012310548395787484 --0.1
+ALIGN_ANGLE = 0.35960096982549 --0.15
 
 
 -- function used to copy two tables
@@ -164,7 +172,7 @@ function step()
 				if finished then 
 					-- current_fwd_steps = FWD_STEPS + 50 
 					current_fwd_steps = FWD_STEPS
-					--ENTER_VELOCITY = 1000
+					ENTER_VELOCITY = ENTER_DEEP_VELOCITY
 				end --enter deep
 			else 
 				robot.wheels.set_velocity(ROTATE_VELOCITY, -ROTATE_VELOCITY)

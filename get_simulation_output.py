@@ -39,20 +39,20 @@ def thread_function(name):
 	"""
 	Function executed by a thread : execute one simulation of argos
 	"""
-	logging.info("Thread %s: starting", name)
+	# logging.info("Thread %s: starting", name)
 	nb_steps = run_one_simulation()
 	threads_values[name] = nb_steps
 	# print("nb steps: ", run_one_simulation())
-	logging.info("Thread %s: finishing", name)
+	# logging.info("Thread %s: finishing", name)
 
-def print_threads_results():
+def print_threads_results(convergence_limit):
 	""" 
 	Show the results obtained by threads
 	"""
 	print("=========== RESULTS : ")
 	nb_failed = 0
 	for i in range(len(threads_values)):
-		if threads_values[i] == 3000:
+		if threads_values[i] == convergence_limit:
 			nb_failed += 1
 		print(f"thread {i} : {threads_values[i]} steps")
 	print("=========== AVERAGE : ", sum(threads_values) / len(threads_values))
@@ -72,18 +72,18 @@ def run_with_threads(nb_threads):
 
 	threads = list()
 	for index in range(nb_threads):
-		logging.info("Main    : create and start thread %d.", index)
+		# logging.info("Main    : create and start thread %d.", index)
 		x = threading.Thread(target=thread_function, args=(index,))
 		threads.append(x)
 		x.start()
 
 	for index, thread in enumerate(threads):
-		logging.info("Main    : before joining thread %d.", index)
+		# logging.info("Main    : before joining thread %d.", index)
 		thread.join()
-		logging.info("Main    : thread %d done", index)
+		# logging.info("Main    : thread %d done", index)
 
-
-	print_threads_results()
+	convergence_limit = 1000
+	print_threads_results(convergence_limit)
 
 	end_time_sec = time.time() - start_time
 	in_minutes = math.floor(end_time_sec/60)
@@ -96,7 +96,7 @@ def run_with_threads(nb_threads):
 if __name__ == "__main__":
 	# nb_runs = 10
 	# average_runs(nb_runs)
-	nb_threads = 10
+	nb_threads = 5
 	threads_values = [0 for i in range(nb_threads)]
 	run_with_threads(nb_threads)
 

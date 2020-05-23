@@ -9,7 +9,7 @@ class ParticleSwarmOpti:
 	
 	def __init__(self, nb_it, nb_eval, n, seed, nb_parti, inertia, phi1, phi2):
 		
-		self.iterations = 0
+		self.iteration = 0
 		self.max_iterations = nb_it
 		self.max_evaluations = nb_eval
 		self.evaluations = 0
@@ -46,12 +46,13 @@ class ParticleSwarmOpti:
 		print("Parameters: ")
 		print("nb params : ", self.size)
 		print("nb particles: ", self.nb_particles)
-		print("neighbours topology", "G best neighbourhood")
+		print("neighbours topology: ", "G best neighbourhood")
 		print("nb iterations: ", self.max_iterations)
 		print("inertia : ", self.inertia)
 		print("phi 1: ", self.phi_1)
 		print("phi 2: ", self.phi_2)
 		print("seed: ", self.seed)
+		print("=============================================")
 
 	
 	def createGbestTopology(self):
@@ -92,11 +93,11 @@ class ParticleSwarmOpti:
 				self.best_particle = self.swarm[i]
 		
 		if (prev_eval > self.global_best_sol.getEval()):
-			print(f"New best solution {self.global_best_sol.getEval()} found at iteration {self.iterations}")
+			print(f"New best solution {self.global_best_sol.getEval()} found at iteration {self.iteration}")
 
 
 	def terminateCondition(self):
-		if (self.max_iterations != 0 and self.iterations > self.max_iterations):
+		if (self.max_iterations != 0 and self.iteration > self.max_iterations):
 			return True 
 		if (self.max_evaluations != 0 and self.evaluations > self.max_evaluations):
 			return True 
@@ -122,7 +123,7 @@ class ParticleSwarmOpti:
 def main():
 	nb_params = 4
 	nb_particles = 5
-	nb_it = 10
+	nb_it = 5
 	nb_eval = 0
 	nb_run = 1
 
@@ -142,16 +143,15 @@ def main():
 	start_time = time.time()
 
 	while not pso.terminateCondition():
+		print("iteration : ", pso.iteration)
 		pso.moveSwarm()
 		# pso.evaluations += nb_particles
-		pso.iterations += 1 
+		pso.iteration += 1 
 
 	
 	end_time = time.time() - start_time
 	print("Best solution found: {} steps".format(pso.getBestEval()))
 	print("Time spent: {} seconds = {} minutes".format(end_time, round(end_time/60)))
-
-
 
 
 if __name__ == "__main__":
