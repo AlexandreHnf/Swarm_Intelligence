@@ -5,8 +5,9 @@ import Utils
 
 
 class Particle:
-	def __init__(self, simulation=None, phi_1=1, phi_2=1, inertia=1):
+	def __init__(self, my_id, simulation=None, phi_1=1, phi_2=1, inertia=1):
 
+		self.id = my_id
 		self.simulation = simulation # optim
 		self.current = Solution()
 		self.pbest = Solution()
@@ -47,11 +48,11 @@ class Particle:
 			u1 = Utils.getRandom01() # random value for the personal component
 			u2 = Utils.getRandom01() # random value for the social component
 
-			inertia = self.inertia * self.velocity[i]
+			new_inertia = self.inertia * self.velocity[i]
 			cognitive_influence = self.phi_1 * u1 * (self.pbest.getValue(i) - self.current.getValue(i))
 			social_influence = self.phi_2 * u2 * (self.gbest.getValue(i) - self.current.getValue(i))
 
-			self.velocity[i] = (inertia) + (cognitive_influence) + (social_influence)
+			self.velocity[i] = (new_inertia) + (cognitive_influence) + (social_influence)
 			self.current.setValue(i, self.current.getValue(i) + self.velocity[i])
 
 			if self.current.getValue(i) < self.simulation.getLowerBound(i):
@@ -60,6 +61,7 @@ class Particle:
 				self.current.setValue(i, self.simulation.getUpperBound(i))
 		
 		self.evaluateSolution()
+		print("particle {} after move : {} steps".format(self.id, self.current.getEval()))
 
 
 	def evaluateSolution(self):

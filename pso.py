@@ -78,12 +78,19 @@ class ParticleSwarmOpti:
 		"""
 		return self.global_best_sol.getEval()
 
+	def getBestSolution(self):
+		"""
+		Returns the final global best solution (x)
+		"""
+		return self.global_best_sol.getValues()
+
 	def moveSwarm(self):
 		""" 
 		Move the all swarm => each particle moves according to their personal best score
 		and global best score and based on the neighbourhood
 		"""
 
+		print("iteration : ", self.iteration)
 		prev_eval = self.global_best_sol.getEval()
 		for i in range(self.nb_particles):
 			self.swarm[i].move()
@@ -107,7 +114,7 @@ class ParticleSwarmOpti:
 	def createSwarm(self):
 		print("Creating swarm..")
 		for i in range(self.nb_particles):
-			p = Particle(self.simulation, self.phi_1, self.phi_2, self.inertia)
+			p = Particle(i+1, self.simulation, self.phi_1, self.phi_2, self.inertia)
 			print(f"Particle {i} evaluation: {p.getPbestEvaluation()}")
 
 			self.swarm.append(p)
@@ -119,20 +126,13 @@ class ParticleSwarmOpti:
 		self.createGbestTopology()
 		print("Best initial solution quality: {}".format(self.global_best_sol.getEval()))
 
+def saveBestSol(sol, evaluation):
+	with open("best_sol_found.txt", "a+") as sol_file:
+		s = "{}, {}, {}, {} => {}\n".format(sol[0], sol[1], sol[2], sol[3], evaluation)
+		sol_file.write(s)
+		sol_file.write("===================================")
 
-def main():
-	nb_params = 4
-	nb_particles = 5
-	nb_it = 5
-	nb_eval = 0
-	nb_run = 1
-
-	seed = 54321
-	phi1 = 1
-	phi2 = 1
-	inertia = 1
-
-	
+def runOnePSO(nb_params, nb_particles, nb_it, nb_eval, seed, phi1, phi2, inertia):
 	pso = ParticleSwarmOpti(nb_it, nb_eval, nb_params, seed, nb_particles, inertia, phi1, phi2)
 
 	pso.printParameters()
@@ -140,18 +140,36 @@ def main():
 	pso.initialize()
 	pso.createSwarm()
 
-	start_time = time.time()
-
 	while not pso.terminateCondition():
-		print("iteration : ", pso.iteration)
 		pso.moveSwarm()
 		# pso.evaluations += nb_particles
 		pso.iteration += 1 
 
+	return pso.getBestEval(), pso.getBestSolution()
+
+def runMultiplePSO(nb_run):
+	nb_params = 4
+	nb_particles = 5
+	nb_it = 5
+	nb_eval = 0
+	seed = 54321
+	phi1 = 1
+	phi2 = 1
+	inertia = 1
+
+	for i in range(nb_run):
+		start_time = time.time()
+
+		best_eval, best_sol = runOnePSO(nb_params, nb_particles, nb_it, nb_eval, seed, phi1, phi2, inertia)
 	
-	end_time = time.time() - start_time
-	print("Best solution found: {} steps".format(pso.getBestEval()))
-	print("Time spent: {} seconds = {} minutes".format(end_time, round(end_time/60)))
+		end_time = time.time() - start_time
+		print("Best solution found: {} steps | params = {}".format(best_eval, best_sol))
+		print("Time spent: {} seconds = {} minutes".format(end_time, round(end_time/60)))
+
+		saveBestSol(best_sol, best_eval)
+
+def main():
+	runMultiplePSO(1)
 
 
 if __name__ == "__main__":

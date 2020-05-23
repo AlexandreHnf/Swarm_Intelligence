@@ -49,7 +49,9 @@ class Simulation:
 		o = str(output.stdout, encoding)
 		nb_steps = o.strip().split("\x1b[0m\x1b[1;32m")[-1].replace("\x1b[0m\n\x1b[0m", "")
 
-		if nb_steps == "":
+		try:
+			r = int(nb_steps)
+		except:
 			print(o)
 		return int(nb_steps) # /!\ ValueError: invalid literal for int() with base 10: ''
 
