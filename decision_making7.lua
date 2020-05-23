@@ -32,19 +32,19 @@ FWD_STEPS = 50
 current_fwd_steps = 0
 FWD_VELOCITY = 10
 ENTER_VELOCITY = 50
-ENTER_DEEP_VELOCITY = 639.8298434757605 -- 80
+ENTER_DEEP_VELOCITY = 80 -- 80
 
 -- variables for alignment
 MAX_ALIGN_STEPS = 50
 current_align_steps = 0
 MAX_TURN_STEPS = 40
-ROTATE_VELOCITY = 14.916103113798831 -- 10
+ROTATE_VELOCITY = 10 -- 10
 
 new_nest = -1 
 finished = false -- when the robot joined the best room
 
-ALIGN_ANGLE = 0.2949335687809216 --0.15
-AVOID_DISTANCE = 0.04088480419842377 --0.1
+ALIGN_ANGLE = 0.15 --0.15
+AVOID_DISTANCE = 0.1 --0.1
 
 -- function used to copy two tables
 function table.copy(t)
@@ -86,6 +86,8 @@ end
 
 function get_all_leds_sensed(nb_led_sensed)
 	all_leds = table.copy(robot.colored_blob_omnidirectional_camera)
+	-- sort by increasing order and based on distance towards the led source
+	table.sort(all_leds, function(a,b) return a.distance<b.distance end)
 	return all_leds
 end
 
@@ -207,7 +209,13 @@ function step()
 				current_state = STOP
 			else 
 
-				if is_scout and Q == -1 then Q = get_room_quality(leds_counters) end 
+				if is_scout and Q == -1 then 
+					-- check that he is in the right room (assigned to him)
+					--if found_nest_room(all_leds_sensed[door].color) then 
+					--	Q = get_room_quality(leds_counters) 
+					--end
+					Q = get_room_quality(leds_counters)
+				end 
 				current_state = EXPLORE 
 			end
 
