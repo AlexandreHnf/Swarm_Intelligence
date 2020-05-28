@@ -1,4 +1,5 @@
-import random 
+import random
+from datetime import datetime
 
 def getRandom01():
 	""" 

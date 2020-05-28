@@ -2,6 +2,9 @@ import time
 from Simulation import Simulation 
 from Particle import Particle 
 from Solution import Solution
+import random
+
+from scipy.stats import ranksums
 
 BIG_NUMBER = 1000000000
 
@@ -72,6 +75,12 @@ class ParticleSwarmOpti:
 		self.global_best_sol.setValues(new_x)
 		self.global_best_sol.setEval(new_eval)
 
+	def getFinalBestSolution(self):
+		"""
+		Returns the best solution found after the whole PSO
+		"""
+		return self.global_best_sol
+
 	def getBestEval(self):
 		""" 
 		Returns the final global best solution evaluation
@@ -137,6 +146,8 @@ def runOnePSO(nb_params, nb_particles, nb_it, nb_eval, seed, phi1, phi2, inertia
 
 	pso.printParameters()
 
+	random.seed(seed)
+
 	pso.initialize()
 	pso.createSwarm()
 
@@ -145,35 +156,54 @@ def runOnePSO(nb_params, nb_particles, nb_it, nb_eval, seed, phi1, phi2, inertia
 		# pso.evaluations += nb_particles
 		pso.iteration += 1 
 
-	return pso.getBestEval(), pso.getBestSolution()
+	return pso.getFinalBestSolution()
 
-def runMultiplePSO(nb_run):
+def runMultiplePSO(nb_run, seeds):
 	nb_params = 4
-	nb_particles = 3
-	nb_it = 5
+	nb_particles = 10
+	nb_it = 10
 	nb_eval = 0
-	seed = 54321
 	phi1 = 1
 	phi2 = 1
 	inertia = 1
 
+	best_solutions = []
+
 	for i in range(nb_run):
 		start_time = time.time()
 
-		best_eval, best_sol = runOnePSO(nb_params, nb_particles, nb_it, nb_eval, seed, phi1, phi2, inertia)
+		best_sol = runOnePSO(nb_params, nb_particles, nb_it, nb_eval, seeds[i], phi1, phi2, inertia)
 	
 		end_time = time.time() - start_time
-		print("Best solution found: {} steps | params = {}".format(best_eval, best_sol))
+		print("Best solution found: {} steps | params = {}".format(best_sol.getEval(), best_sol.getValues()))
 		print("Time spent: {} seconds = {} minutes".format(end_time, round(end_time/60)))
 
-		saveBestSol(best_sol, best_eval)
+		# saveBestSol(best_sol, best_eval)
 
+		best_solutions.append(best_sol)
+
+	return best_solutions
+
+
+def ranksumTest(best_solutions, nb_params):
+	x = []
+	y = []
+	simulation = Simulation(nb_params)
+	for sol in best_solutions:
+		x.append(sol.getEval())
+		nb_steps, all_evaluations = simulation.evaluateMany(sol.getValues(), 10)
+		y += all_evaluations
+
+	p_value = ranksums(x,y)
+	print("p_value = ", p_value)
 
 # ==============================================================================
 
 
 def main():
-	runMultiplePSO(1)
+	seeds = [443, 4849, 6554, 328, 1050, 3110, 4868, 902, 8460, 5416]
+	nb_runs = 1
+	runMultiplePSO(nb_runs, seeds)
 
 
 if __name__ == "__main__":

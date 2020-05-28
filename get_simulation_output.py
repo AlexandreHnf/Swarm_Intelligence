@@ -1,18 +1,22 @@
 import subprocess, shlex
 import time
-import logging, threading
+import logging
+import threading
 import math
 
 threads_values = []
 
-def run_one_simulation():
+def run_one_simulation(number):
 	"""
 	Run one simulation of argos
 	"""
-	
-	output = subprocess.run(shlex.split("argos3 -c decision-making.argos"), capture_output=True)
+
+	argos_command = "argos3 -c decision-making{}.argos".format(number + 1)
+	print(argos_command)
+	output = subprocess.run(shlex.split(argos_command), capture_output=True)
 	o = str(output.stdout, "utf-8")
-	nb_steps = o.strip().split("\x1b[0m\x1b[1;32m")[-1].replace("\x1b[0m\n\x1b[0m", "")
+	nb_steps = o.strip().split("Experiment ends at: \x1b[0m\x1b[1;32m")[1].replace("\x1b[0m\n\x1b[0m", "")
+	# nb_steps = o.strip().split("\x1b[0m\x1b[1;32m")[-1].replace("\x1b[0m\n\x1b[0m", "")
 
 	return int(nb_steps)
 
@@ -25,7 +29,7 @@ def average_runs(nb_runs):
 	start_time = time.time()
 	tot = 0
 	for i in range(nb_runs):
-		nb_steps = run_one_simulation() 
+		nb_steps = run_one_simulation(i+1)
 		tot += nb_steps 
 		print(f"{i}, nb of steps : {nb_steps}")
 	
@@ -40,7 +44,7 @@ def thread_function(name):
 	Function executed by a thread : execute one simulation of argos
 	"""
 	# logging.info("Thread %s: starting", name)
-	nb_steps = run_one_simulation()
+	nb_steps = run_one_simulation(name)
 	threads_values[name] = nb_steps
 	# print("nb steps: ", run_one_simulation())
 	# logging.info("Thread %s: finishing", name)
@@ -55,7 +59,7 @@ def print_threads_results(convergence_limit):
 		if threads_values[i] == convergence_limit:
 			nb_failed += 1
 		print(f"thread {i} : {threads_values[i]} steps")
-	print("=========== AVERAGE : ", sum(threads_values) / len(threads_values))
+	print("=========== AVERAGE : ", int(sum(threads_values) / len(threads_values)))
 	print(f"=========== CONVERGENCE : {len(threads_values) - nb_failed}/{len(threads_values)}, \
 			nb fails: {nb_failed}")
 
@@ -96,7 +100,7 @@ def run_with_threads(nb_threads):
 if __name__ == "__main__":
 	# nb_runs = 10
 	# average_runs(nb_runs)
-	nb_threads = 10
+	nb_threads = 1
 	threads_values = [0 for i in range(nb_threads)]
 	run_with_threads(nb_threads)
 

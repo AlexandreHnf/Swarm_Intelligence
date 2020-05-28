@@ -94,6 +94,8 @@ end
 
 function get_all_leds_sensed(nb_led_sensed)
 	all_leds = table.copy(robot.colored_blob_omnidirectional_camera)
+	-- sort by increasing order and based on distance towards the led source
+	table.sort(all_leds, function(a,b) return a.distance<b.distance end)
 	return all_leds
 end
 

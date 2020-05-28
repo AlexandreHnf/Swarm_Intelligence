@@ -39,22 +39,26 @@ class Simulation:
 			return random.uniform(self.lower_bounds[i], self.upper_bounds[i])
 		return random.randrange(self.lower_bounds[i], self.upper_bounds[i])
 
-	def run_one_simulation(self):
+	def run_one_simulation(self, particle_id):
 		""" 
 		Runs one argos simulation and returns the nb of steps elapsed
 		"""
 		
-		output = subprocess.run(shlex.split("argos3 -c decision-making.argos"), capture_output=True)
+		argos_command = "argos3 -c decision-making{}.argos".format(particle_id+1)
+		output = subprocess.run(shlex.split(argos_command), capture_output=True)
 		encoding = "utf-8"
 		o = str(output.stdout, encoding)
-		nb_steps = o.strip().split("\x1b[0m\x1b[1;32m")[-1].replace("\x1b[0m\n\x1b[0m", "")
 
-		# try:
-		# 	return int(nb_steps) # /!\ ValueError: invalid literal for int() with base 10: ''
-		# except:
-		# 	print(o)
+		try:
+			nb_steps = o.strip().split("Experiment ends at: \x1b[0m\x1b[1;32m")[1].replace("\x1b[0m\n\x1b[0m", "")
+			return int(nb_steps) # /!\ ValueError: invalid literal for int() with base 10: ''
+		except:
+			print([o])
+			print("command used: ", argos_command)
+			print(output.stdout)
+			return "error"
 		# print("coupable: ", nb_steps)
-		return int(nb_steps) # /!\ ValueError: invalid literal for int() with base 10: ''
+		#return int(nb_steps) # /!\ ValueError: invalid literal for int() with base 10: ''
 
 
 	def thread_function(self, name):
@@ -62,9 +66,11 @@ class Simulation:
 		Function executed by a thread : execute one simulation of argos
 		"""
 		#logging.info("Thread %s: starting", name)
-		nb_steps = self.run_one_simulation()
+		nb_steps = self.run_one_simulation(name)
+		if nb_steps == "error":
+			nb_steps = self.run_one_simulation(name)
 		self.threads_values[name] = nb_steps
-		# print("nb steps: ", run_one_simulation())
+		# print("nb steps: ", run_one_simulation(name))
 		#logging.info("Thread %s: finishing", name)
 
 	def print_threads_results(self):
@@ -133,11 +139,22 @@ class Simulation:
 		and returns the nb of steps
 		"""
 
-		nb_threads = 5
+		nb_threads = 1
 		self.threads_values = [0 for _ in range(nb_threads)]
 
 		self.write_to_file(solution)
 		
 		# return self.average_runs(10)
-		# return self.run_one_simulation()
+		# return self.run_one_simulation(1)
 		return self.run_with_threads(nb_threads)
+
+	def evaluateMany(self, solution, nb_threads):
+		"""
+		evaluate n simulations with one given solution and
+		returns all the simulations results
+		"""
+		self.threads_values = [0 for _ in range(nb_threads)]
+
+		self.write_to_file(solution)
+		average_nb_steps = self.run_with_threads(nb_threads)
+		return self.threads_values, average_nb_steps
