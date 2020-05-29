@@ -8,7 +8,7 @@ class Particle:
 	def __init__(self, my_id, simulation=None, phi_1=1, phi_2=1, inertia=1):
 
 		self.id = my_id
-		self.simulation = simulation # optim
+		self.simulation = simulation  # optim
 		self.current = Solution()
 		self.pbest = Solution()
 		self.gbest = Solution()
@@ -61,14 +61,14 @@ class Particle:
 				self.current.setValue(i, self.simulation.getUpperBound(i))
 		
 		self.evaluateSolution()
-		print("particle {} after move : {} steps".format(self.id, self.current.getEval()))
+		# print("particle {} after move : {} steps".format(self.id, self.current.getEval()))
 
 
 	def evaluateSolution(self):
 		""" 
 		If the new solution is better than the personal best, update it
 		"""
-		print("current sol = ", self.current.getValues())
+		# print("current sol = ", self.current.getValues())
 		new_eval = self.simulation.evaluate(self.current.getValues())
 		# print("new eval : ", new_eval)
 		self.current.setEval(new_eval)

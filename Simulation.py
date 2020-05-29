@@ -14,12 +14,13 @@ AVOID_DISTANCE = [0.01; 0.1]
 
 class Simulation:
 
-	def __init__(self, nb_params):
+	def __init__(self, nb_params, run_id):
 		self.nb_params = nb_params
 		self.lower_bounds = [50, 1, 0.1, 0.01] 
 		self.upper_bounds = [1000, 30, 0.5, 0.1]
 		self.threads_values = []
 		self.convergence_limit = 1000 # nb of steps max of a simulation
+		self.run_id = run_id
 
 	def getLowerBound(self, i):
 		return self.lower_bounds[i]
@@ -39,39 +40,40 @@ class Simulation:
 			return random.uniform(self.lower_bounds[i], self.upper_bounds[i])
 		return random.randrange(self.lower_bounds[i], self.upper_bounds[i])
 
-	def run_one_simulation(self, particle_id):
+	def simulate(self):
+		"""
+		Runs one argos and returns nb of steps elapsed
+		"""
+		argos_command = "argos3 -c decision-making{}.argos".format(self.run_id)
+		if self.run_id == 0:  # random seed argos
+			argos_command = "argos3 -c decision-making.argos"
+		output = subprocess.run(shlex.split(argos_command), capture_output=True)
+		encoding = "utf-8"
+		str_output = str(output.stdout, encoding)
+		try:
+			nb_steps = str_output.strip().split("Experiment ends at: \x1b[0m\x1b[1;32m")[1].replace("\x1b[0m\n\x1b[0m", "")
+			return int(nb_steps)  # /!\ ValueError: invalid literal for int() with base 10: ''
+		except:
+			# print("ERROR when simulation : guilty = {}, command = {}, o = {}".format([str_output], argos_command, output.stdout))
+			return "error"
+
+	def run_one_simulation(self):
 		""" 
 		Runs one argos simulation and returns the nb of steps elapsed
 		"""
 		
-		argos_command = "argos3 -c decision-making{}.argos".format(particle_id+1)
-		output = subprocess.run(shlex.split(argos_command), capture_output=True)
-		encoding = "utf-8"
-		o = str(output.stdout, encoding)
+		nb_steps = self.simulate()
+		while nb_steps == "error": # /!\ CAN BE INFINITE !!!!
+			nb_steps = self.simulate()
 
-		try:
-			nb_steps = o.strip().split("Experiment ends at: \x1b[0m\x1b[1;32m")[1].replace("\x1b[0m\n\x1b[0m", "")
-			return int(nb_steps) # /!\ ValueError: invalid literal for int() with base 10: ''
-		except:
-			print([o])
-			print("command used: ", argos_command)
-			print(output.stdout)
-			return "error"
-		# print("coupable: ", nb_steps)
-		#return int(nb_steps) # /!\ ValueError: invalid literal for int() with base 10: ''
-
+		return nb_steps
 
 	def thread_function(self, name):
 		"""
 		Function executed by a thread : execute one simulation of argos
 		"""
-		#logging.info("Thread %s: starting", name)
-		nb_steps = self.run_one_simulation(name)
-		if nb_steps == "error":
-			nb_steps = self.run_one_simulation(name)
+		nb_steps = self.run_one_simulation()
 		self.threads_values[name] = nb_steps
-		# print("nb steps: ", run_one_simulation(name))
-		#logging.info("Thread %s: finishing", name)
 
 	def print_threads_results(self):
 		""" 
@@ -126,7 +128,8 @@ class Simulation:
 		Solution = Object containing a list of solution parameters and an
 		objective function
 		"""
-		with open("simulation_parameters.txt", "w") as params_file:
+		sim_param_file = "simulation_parameters{}.txt".format(self.run_id)
+		with open(sim_param_file, "w") as params_file:
 			# print(solution)
 			for p in solution:
 				params_file.write("{}\n".format(p))
@@ -143,10 +146,10 @@ class Simulation:
 		self.threads_values = [0 for _ in range(nb_threads)]
 
 		self.write_to_file(solution)
-		
-		# return self.average_runs(10)
-		# return self.run_one_simulation(1)
-		return self.run_with_threads(nb_threads)
+
+		nb_steps = self.run_one_simulation()
+		return nb_steps
+		# return self.run_with_threads(nb_threads)
 
 	def evaluateMany(self, solution, nb_threads):
 		"""
@@ -155,6 +158,6 @@ class Simulation:
 		"""
 		self.threads_values = [0 for _ in range(nb_threads)]
 
-		self.write_to_file(solution)
+		self.write_to_file(solution) # same solution for n threads (simulations)
 		average_nb_steps = self.run_with_threads(nb_threads)
 		return self.threads_values, average_nb_steps
