@@ -39,7 +39,6 @@ class Particle:
 		self.current.initRandom(self.size, self.simulation)
 		self.pbest.setValues(self.current.getValues())
 		self.evaluateSolution()
-		# print("new eval : ", self.current.getEval())
 
 	def move(self):
 		self.findGbestParticle() # the global best depends on the topology
@@ -70,7 +69,6 @@ class Particle:
 		"""
 		# print("current sol = ", self.current.getValues())
 		new_eval = self.simulation.evaluate(self.current.getValues())
-		# print("new eval : ", new_eval)
 		self.current.setEval(new_eval)
 		if (self.current.getEval() < self.pbest.getEval()):
 			self.pbest.setValues(self.current.getValues())	

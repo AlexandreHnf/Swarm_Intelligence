@@ -35,18 +35,7 @@ class multiplePSO:
 
     def runOnePSO(self, nb_params, nb_particles, nb_it, nb_eval, seed, phi1, phi2, inertia, run_id):
         pso = ParticleSwarmOpti(nb_it, nb_eval, nb_params, seed, nb_particles, inertia, phi1, phi2, run_id)
-
-        #pso.printParameters()
-
-        random.seed(seed)
-
-        pso.initialize()
-        pso.createSwarm()
-
-        while not pso.terminateCondition():
-            pso.moveSwarm()
-            pso.iteration += 1
-
+        pso.run()
         return pso.getFinalBestSolution()
 
     def thread_function(self, name):
@@ -60,33 +49,6 @@ class multiplePSO:
         # print("Time spent: {} seconds = {} minutes".format(end_time, round(end_time / 60)))
 
         self.best_solutions[name] = best_sol
-
-
-    def runMultiplePSO(self, nb_run, seeds):
-        nb_params = 4
-        nb_particles = 10
-        nb_it = 10
-        nb_eval = 0
-        phi1 = 1
-        phi2 = 1
-        inertia = 1
-
-        best_solutions = []
-
-        for i in range(nb_run):  # i + 1 = run ID
-            start_time = time.time()
-
-            best_sol = self.runOnePSO(nb_params, nb_particles, nb_it, nb_eval, seeds[i], phi1, phi2, inertia, i + 1)
-
-            end_time = time.time() - start_time
-            print("Best solution found: {} steps | params = {}".format(best_sol.getEval(), best_sol.getValues()))
-            print("Time spent: {} seconds = {} minutes".format(end_time, round(end_time / 60)))
-
-            self.saveBestSol(best_sol.getValues(), best_sol.getEval())
-
-            best_solutions.append(best_sol)
-
-        return best_solutions
 
 
     def run_with_threads(self):
