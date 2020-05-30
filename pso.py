@@ -3,6 +3,7 @@ from Simulation import Simulation
 from Particle import Particle 
 from Solution import Solution
 import random
+import Utils
 
 from scipy.stats import ranksums
 
@@ -180,9 +181,9 @@ def runMultiplePSO(nb_run, seeds):
 
 		best_sol = runOnePSO(nb_params, nb_particles, nb_it, nb_eval, seeds[i], phi1, phi2, inertia, i+1)
 
-		end_time = time.time() - start_time
 		print("Best solution found: {} steps | params = {}".format(best_sol.getEval(), best_sol.getValues()))
-		print("Time spent: {} seconds = {} minutes".format(end_time, round(end_time/60)))
+
+		Utils.displayTiming(start_time)
 
 		saveBestSol(best_sol.getValues(), best_sol.getEval())
 
@@ -194,12 +195,15 @@ def runMultiplePSO(nb_run, seeds):
 def ranksumTest(best_solutions, nb_params):
 	x = []
 	y = []
-	simulation = Simulation(nb_params, 0) # id 0 so that argos seeds are random
+	simulation = Simulation(nb_params, 0)  # id 0 so that argos seeds are random
 	for sol in best_solutions:
-		x.append(sol.getEval())
-		all_evaluations, nb_steps = simulation.evaluateMany(sol.getValues(), 10)
+		x.append(sol[1])
+		all_evaluations, nb_steps = simulation.evaluateMany(sol[0], 10)
 		y += all_evaluations
+		print("p_value")
 
+	print("x = ", x)
+	print("y = ", y)
 	p_value = ranksums(x,y)
 	print("p_value = ", p_value)
 
@@ -214,21 +218,21 @@ def main():
 	seeds = [443, 4849, 6554, 328, 1050, 3110, 4868, 902, 8460, 5416]
 	# seeds = [4849, 443, 6554, 328, 1050, 3110, 4868, 902, 8460, 5416]
 	nb_runs = 1
-	best_solutions = runMultiplePSO(nb_runs, seeds)
-	displayBestSol(best_solutions)
+	# best_solutions = runMultiplePSO(nb_runs, seeds)
+	# displayBestSol(best_solutions)
 
-	# best_solutions = [([212.736147464836, 19.573044622727608, 0.4001092164203171, 0.08374353425434194], 280),
-	# 				  ([420.45592575519413, 17.92061612388558, 0.4283722490788896, 0.08176026649594798], 289),
-	# 				  ([515.1380035694767, 25.254513362671315, 0.4840204934812594, 0.07714880092810156], 276),
-	# 				  ([298.14062356443884, 24.680678992737228, 0.4564638937586887, 0.02403460126093475], 267),
-	# 				  ([590.2624238768972, 24.189712516156963, 0.5, 0.06353384453135309], 230),
-	# 				  ([293.478778080981, 19.8710290222967, 0.22200230837319782, 0.07516463985673903], 281),
-	# 				  ([1000, 26.219112640278986, 0.5, 0.03331872619773328], 271),
-	# 				  ([541.1680110360132, 17.21222986461231, 0.35699825798664797, 0.1], 224),
-	# 				  ([232.31644227469013, 21.626420276077194, 0.446538792584363, 0.02059718131143208], 200),
-	# 				  ([885.8713065146162, 17.329087086711827, 0.3688214387901522, 0.06437088347876216], 301),
-	# 				  ]
-	# ranksumTest(best_solutions, nb_params=4)
+	best_solutions = [([212.736147464836, 19.573044622727608, 0.4001092164203171, 0.08374353425434194], 280),
+					  ([420.45592575519413, 17.92061612388558, 0.4283722490788896, 0.08176026649594798], 289),
+					  ([515.1380035694767, 25.254513362671315, 0.4840204934812594, 0.07714880092810156], 276),
+					  ([298.14062356443884, 24.680678992737228, 0.4564638937586887, 0.02403460126093475], 267),
+					  ([590.2624238768972, 24.189712516156963, 0.5, 0.06353384453135309], 230),
+					  ([293.478778080981, 19.8710290222967, 0.22200230837319782, 0.07516463985673903], 281),
+					  ([1000, 26.219112640278986, 0.5, 0.03331872619773328], 271),
+					  ([541.1680110360132, 17.21222986461231, 0.35699825798664797, 0.1], 224),
+					  ([232.31644227469013, 21.626420276077194, 0.446538792584363, 0.02059718131143208], 200),
+					  ([885.8713065146162, 17.329087086711827, 0.3688214387901522, 0.06437088347876216], 301),
+					  ]
+	ranksumTest(best_solutions, nb_params=4)
 
 
 

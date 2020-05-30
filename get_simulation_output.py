@@ -3,6 +3,7 @@ import time
 import logging
 import threading
 import math
+import Utils
 
 threads_values = []
 
@@ -11,8 +12,9 @@ def run_one_simulation(number):
 	Run one simulation of argos
 	"""
 
-	argos_command = "argos3 -c decision-making{}.argos".format(number + 1)
-	print(argos_command)
+	# argos_command = "argos3 -c decision-making{}.argos".format(number + 1)
+	argos_command = "argos3 -c decision-making.argos"
+	# print(argos_command)
 	output = subprocess.run(shlex.split(argos_command), capture_output=True)
 	o = str(output.stdout, "utf-8")
 	nb_steps = o.strip().split("Experiment ends at: \x1b[0m\x1b[1;32m")[1].replace("\x1b[0m\n\x1b[0m", "")
@@ -36,7 +38,7 @@ def average_runs(nb_runs):
 	average = tot / nb_runs
 
 	print(f"average nb of steps on {nb_runs} = {average}")
-	print(f"done in {time.time() - start_time}")
+	Utils.displayTiming(start_time)
 
 
 def thread_function(name):
@@ -60,8 +62,13 @@ def print_threads_results(convergence_limit):
 			nb_failed += 1
 		print(f"thread {i} : {threads_values[i]} steps")
 	print("=========== AVERAGE : ", int(sum(threads_values) / len(threads_values)))
+
+	only_convergence = list(filter(lambda a: a != 2, threads_values))
+	print("=========== AVERAGE WITHOUT 1000 : ", int(sum(only_convergence) / len(only_convergence)))
+
 	print(f"=========== CONVERGENCE : {len(threads_values) - nb_failed}/{len(threads_values)}, \
 			nb fails: {nb_failed}")
+	print("steps: ", threads_values)
 
 def run_with_threads(nb_threads):
 	"""
@@ -89,18 +96,14 @@ def run_with_threads(nb_threads):
 	convergence_limit = 1000
 	print_threads_results(convergence_limit)
 
-	end_time_sec = time.time() - start_time
-	in_minutes = math.floor(end_time_sec/60)
-	print("=========== Time spent: ")
-	print("{} seconds".format(end_time_sec))
-	print("{} minutes and {} seconds".format(in_minutes, end_time_sec - in_minutes*60))
+	Utils.displayTiming(start_time)
 
 
 
 if __name__ == "__main__":
 	# nb_runs = 10
 	# average_runs(nb_runs)
-	nb_threads = 1
+	nb_threads = 10
 	threads_values = [0 for i in range(nb_threads)]
 	run_with_threads(nb_threads)
 

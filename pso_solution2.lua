@@ -1,14 +1,15 @@
---[[
-639.8298434757605
-14.916103113798831
-0.2949335687809216
-0.04088480419842377
+function readLines(file_path)
+	local f = io.open(file_path, "rb")
+	local all_lines = {}
+	
+	for line in io.lines(file_path) do
+		table.insert(all_lines, line)
+	end
+	return all_lines
+end
 
-775.3193968979884
-18.093373439413156
-0.35847457248736175
-0.019668098948936008
-]]
+all_lines = readLines("simulation_parameters2.txt")
+
 
 -- states 
 EXPLORE = "EXPLORE"
@@ -33,23 +34,25 @@ is_in_room = false
 Q = -1 -- remembers only the last room's quality he visited
 
 -- variables for straight behavior
-FWD_STEPS = 10 -- 50
+FWD_STEPS = 50 
 current_fwd_steps = 0
-FWD_VELOCITY = 20
-ENTER_VELOCITY = 500 -- 50
-ENTER_DEEP_VELOCITY = 775.3193968979884 -- 80
+FWD_VELOCITY = 10
+ENTER_VELOCITY = 50 -- set param 
+ENTER_DEEP_VELOCITY = tonumber(all_lines[1])
 
 -- variables for alignment
 MAX_ALIGN_STEPS = 50
 current_align_steps = 0
-MAX_TURN_STEPS = 40
-ROTATE_VELOCITY = 18.093373439413156 -- 10
+MAX_TURN_STEPS = 20 -- 40
+ROTATE_VELOCITY = tonumber(all_lines[2])
 
 new_nest = -1 
 finished = false -- when the robot joined the best room
 
-ALIGN_ANGLE = 0.35847457248736175  --0.15
-AVOID_DISTANCE = 0.019668098948936008 --0.1
+ALIGN_ANGLE = tonumber(all_lines[3])
+AVOID_DISTANCE = tonumber(all_lines[4])
+
+
 
 -- function used to copy two tables
 function table.copy(t)
@@ -158,7 +161,7 @@ function step()
 	-- ================================== AVOID =====================================
 	elseif current_state == AVOID then 
 		-- if not can_synchro then 
-		robot.wheels.set_velocity(-10,10)	-- ROTATE LEFT
+		robot.wheels.set_velocity(-ROTATE_VELOCITY,ROTATE_VELOCITY)	-- ROTATE LEFT
 		current_turn_steps = current_turn_steps - 1
 		if not is_in_room and can_synchro then 
 			synchronize()
@@ -214,13 +217,7 @@ function step()
 				current_state = STOP
 			else 
 
-				if is_scout and Q == -1 then 
-					-- check that he is in the right room (assigned to him)
-					--if found_nest_room(all_leds_sensed[door].color) then 
-					--	Q = get_room_quality(leds_counters) 
-					--end
-					Q = get_room_quality(leds_counters)
-				end 
+				if is_scout and Q == -1 then Q = get_room_quality(leds_counters) end 
 				current_state = EXPLORE 
 			end
 
@@ -389,10 +386,10 @@ function get_room_quality(leds_counters)
 	v_o = (nb_objects - 2) / 10 -- object quality within [0,1]
 
 	if is_scout then 
-		log(robot.id .. " Q : " .. (v_f + v_o) / 2)
-		log(robot.id .. " ground: " .. v_f) 
-		log(robot.id .. " nb obj: " .. nb_objects) 
-		log(robot.id .. " obj quality: " .. v_o)
+		-- log(robot.id .. " Q : " .. (v_f + v_o) / 2)
+		-- log(robot.id .. " ground: " .. v_f) 
+		-- log(robot.id .. " nb obj: " .. nb_objects) 
+		-- log(robot.id .. " obj quality: " .. v_o)
 	end
 	
 	return (v_f + v_o) / 2 -- room quality
@@ -467,9 +464,8 @@ function reset()
 
 	Q = -1 -- quality memory
 
+	current_turn_steps = 0
 	current_fwd_steps = 0
-	current_align_steps = 0
-	ENTER_VELOCITY = 100 -- 50
 
 	new_nest = -1
 

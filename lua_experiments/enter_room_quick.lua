@@ -23,8 +23,8 @@ MAX_TURN_STEPS = 40
 current_turn_steps = 0
 
 -- variables for go straight behavior
-FWD_STEPS = 5
-ENTER_VELOCITY = 300
+FWD_STEPS = 20
+ENTER_VELOCITY = 100
 current_fwd_steps = 0
 
 -- variables for alignment

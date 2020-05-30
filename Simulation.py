@@ -2,7 +2,8 @@ import subprocess, shlex
 import logging, threading
 import time
 import random
-import math 
+import math
+import Utils
 
 """
 ENTER_VELOCITY = [50; 1000]
@@ -114,11 +115,7 @@ class Simulation:
 
 		# self.print_threads_results()
 
-		end_time_sec = time.time() - start_time
-		in_minutes = math.floor(end_time_sec/60)
-		# print("=========== Time spent: ")
-		# print("{} seconds".format(end_time_sec))
-		# print("{} minutes and {} seconds".format(in_minutes, end_time_sec - in_minutes*60))
+		Utils.displayTiming(start_time)
 
 		return int(sum(self.threads_values) / len(self.threads_values)) # average nb steps
 
@@ -129,6 +126,8 @@ class Simulation:
 		objective function
 		"""
 		sim_param_file = "simulation_parameters{}.txt".format(self.run_id)
+		if self.run_id == 0:
+			sim_param_file = "simulation_parameters.txt"
 		with open(sim_param_file, "w") as params_file:
 			# print(solution)
 			for p in solution:
