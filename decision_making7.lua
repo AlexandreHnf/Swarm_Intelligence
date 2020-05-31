@@ -42,8 +42,9 @@ ENTER_DEEP_VELOCITY = 775.3193968979884 -- 80
 -- variables for alignment
 MAX_ALIGN_STEPS = 50
 current_align_steps = 0
-MAX_TURN_STEPS = 40
+MAX_TURN_STEPS = 10
 ROTATE_VELOCITY = 18.093373439413156 -- 10
+--ROTATE_VELOCITY = 20
 
 new_nest = -1 
 finished = false -- when the robot joined the best room
@@ -183,10 +184,10 @@ function step()
 			else 
 				robot.wheels.set_velocity(ROTATE_VELOCITY, -ROTATE_VELOCITY)
 			end
-			if current_align_steps <= 0 then -- VRAIMENT UTILE ?
-				robot.wheels.set_velocity(1,1)
-				current_state = EXPLORE 
-			end
+--			if current_align_steps <= 0 then -- VRAIMENT UTILE ?
+--				robot.wheels.set_velocity(1,1)
+--				current_state = EXPLORE 
+--			end
 		else 
 			current_state = EXPLORE -- if no door sensed anymore
 		end

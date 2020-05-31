@@ -11,14 +11,19 @@ FWD_VELOCITT = [1; 15] => pas encore
 ROTATE_VELOCITY = [1; 30]
 ALIGN_ANGLE = [0.1; 0.5]
 AVOID_DISTANCE = [0.01; 0.1]
+---------------------------
+FWD_VELOCITY = [1; 15]
+FWD_STEPS = [5; 30]
+ENTER_VELOCITY = [50; 500]
 """
 
 class Simulation:
 
-	def __init__(self, nb_params, run_id):
+	def __init__(self, nb_params, run_id, rng):
+		self.rng = rng
 		self.nb_params = nb_params
-		self.lower_bounds = [50, 1, 0.1, 0.01] 
-		self.upper_bounds = [1000, 30, 0.5, 0.1]
+		self.lower_bounds = [50, 1, 0.1, 0.01, 1, 5, 50]
+		self.upper_bounds = [1000, 30, 0.5, 0.1, 15, 30, 500]
 		self.threads_values = []
 		self.convergence_limit = 1000 # nb of steps max of a simulation
 		self.run_id = run_id
@@ -38,8 +43,10 @@ class Simulation:
 		/!\ Float values ?, here int for the moment
 		"""
 		if type(self.lower_bounds[i]) == float:
-			return random.uniform(self.lower_bounds[i], self.upper_bounds[i])
-		return random.randrange(self.lower_bounds[i], self.upper_bounds[i])
+		# 	return random.uniform(self.lower_bounds[i], self.upper_bounds[i])
+		# return random.randrange(self.lower_bounds[i], self.upper_bounds[i])
+			return self.rng.uniform(self.lower_bounds[i], self.upper_bounds[i])
+		return self.rng.randrange(self.lower_bounds[i], self.upper_bounds[i])
 
 	def simulate(self):
 		"""
@@ -115,14 +122,14 @@ class Simulation:
 
 		# self.print_threads_results()
 
-		Utils.displayTiming(start_time)
+		# Utils.displayTiming(start_time)
 
 		return int(sum(self.threads_values) / len(self.threads_values)) # average nb steps
 
 
 	def write_to_file(self, solution):
 		""" 
-		Solution = Object containing a list of solution parameters and an
+		solution = Object containing a list of solution parameters and an
 		objective function
 		"""
 		sim_param_file = "simulation_parameters{}.txt".format(self.run_id)

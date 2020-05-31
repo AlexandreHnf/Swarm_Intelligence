@@ -63,7 +63,7 @@ def print_threads_results(convergence_limit):
 		print(f"thread {i} : {threads_values[i]} steps")
 	print("=========== AVERAGE : ", int(sum(threads_values) / len(threads_values)))
 
-	only_convergence = list(filter(lambda a: a != 2, threads_values))
+	only_convergence = list(filter(lambda a: a != 1000, threads_values))
 	print("=========== AVERAGE WITHOUT 1000 : ", int(sum(only_convergence) / len(only_convergence)))
 
 	print(f"=========== CONVERGENCE : {len(threads_values) - nb_failed}/{len(threads_values)}, \

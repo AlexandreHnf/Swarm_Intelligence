@@ -5,9 +5,10 @@ import Utils
 
 
 class Particle:
-	def __init__(self, my_id, simulation=None, phi_1=1, phi_2=1, inertia=1):
-
+	def __init__(self, my_id, run_id, rng, simulation=None, phi_1=1, phi_2=1, inertia=1):
+		self.run_id = run_id
 		self.id = my_id
+		self.rng = rng
 		self.simulation = simulation  # optim
 		self.current = Solution()
 		self.pbest = Solution()
@@ -44,8 +45,8 @@ class Particle:
 		self.findGbestParticle() # the global best depends on the topology
 
 		for i in range(self.size):
-			u1 = Utils.getRandom01() # random value for the personal component
-			u2 = Utils.getRandom01() # random value for the social component
+			u1 = Utils.getRandom01(self.rng) # random value for the personal component
+			u2 = Utils.getRandom01(self.rng) # random value for the social component
 
 			new_inertia = self.inertia * self.velocity[i]
 			cognitive_influence = self.phi_1 * u1 * (self.pbest.getValue(i) - self.current.getValue(i))
@@ -60,14 +61,14 @@ class Particle:
 				self.current.setValue(i, self.simulation.getUpperBound(i))
 		
 		self.evaluateSolution()
-		# print("particle {} after move : {} steps".format(self.id, self.current.getEval()))
+		print(self.run_id, " particle {} after move : {} steps".format(self.id, self.current.getEval()))
 
 
 	def evaluateSolution(self):
 		""" 
 		If the new solution is better than the personal best, update it
 		"""
-		# print("current sol = ", self.current.getValues())
+		print(self.run_id, " current sol = ", self.current.getValues())
 		new_eval = self.simulation.evaluate(self.current.getValues())
 		self.current.setEval(new_eval)
 		if (self.current.getEval() < self.pbest.getEval()):

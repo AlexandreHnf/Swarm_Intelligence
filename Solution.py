@@ -41,5 +41,9 @@ class Solution:
 	def setEval(self, e):
 		self.eval = e
 
+	def roundValues(self):
+		for i in range(len(self.x)):
+			self.x[i] = round(self.x[i], 3)
+
 	
 	

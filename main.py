@@ -14,9 +14,9 @@ class multiplePSO:
 
     def __init__(self):
         self.seeds = [443, 4849, 6554, 328, 1050, 3110, 4868, 902, 8460, 5416]
-        self.nb_runs = 2
+        self.nb_runs = 10
 
-        self.nb_params = 4
+        self.nb_params = 7
         self.nb_particles = 10
         self.nb_it = 10
         self.nb_eval = 0

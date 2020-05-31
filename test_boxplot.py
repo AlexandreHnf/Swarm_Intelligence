@@ -1,6 +1,7 @@
 from scipy.stats import ranksums
 import numpy as np
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 def testRanksums():
     z = [232, 270, 293, 377, 311, 862, 278, 396, 401, 277, 320, 262, 302, 295, 508, 259, 391, 222, 366, 471, 282, 288, 509, 245, 632, 315, 360, 230, 283, 334, 514, 364, 521, 458, 437, 386, 261, 279, 372, 399, 428, 264, 423, 343, 316, 274, 543, 278, 375, 319, 450, 453, 279, 389, 347, 450, 480, 400, 534, 351, 283, 316, 556, 306, 527, 731, 269, 264, 300, 276, 283, 277, 262, 334, 282, 355, 216, 378, 269, 448, 416, 288, 333, 295, 278, 361, 311, 1000, 361, 271, 204, 292, 672, 297, 269, 431, 249, 293, 222, 352]
@@ -21,6 +22,12 @@ def testRanksums():
 
     print(x)
     print(y)
+    p_value = ranksums(x, y)
+    print("pvalue = ", p_value)
+
+def testRanksums2():
+    x = [280]
+    y = [232, 270, 293, 377, 311, 862, 278, 396, 401, 277]
     p_value = ranksums(x, y)
     print("pvalue = ", p_value)
 
@@ -110,9 +117,12 @@ def test_boxplots4():
     ax.set_ylabel('PSO solutions')
     # plt.setp(bp['whiskers'], color='k', linestyle='-')
     # plt.setp(bp['fliers'], markersize=3.0)
-    plt.show()
+
+    plt.savefig("boxplot{}.png".format(datetime.today()))
+    # plt.show()
 
 # testRanksums()
+# testRanksums2()
 # test_boxplots()
 # test_boxplots2()
 # test_boxplots3()

@@ -32,25 +32,25 @@ is_obstacle_sensed = false
 is_in_room = false 
 
 Q = -1 -- remembers only the last room's quality he visited
+new_nest = -1
+finished = false -- when the robot joined the best room
 
--- variables for straight behavior
-FWD_STEPS = 50 
-current_fwd_steps = 0
-FWD_VELOCITY = 10
-ENTER_VELOCITY = 50 -- set param 
 ENTER_DEEP_VELOCITY = tonumber(all_lines[1])
+ROTATE_VELOCITY = tonumber(all_lines[2])
+ALIGN_ANGLE = tonumber(all_lines[3])
+AVOID_DISTANCE = tonumber(all_lines[4])
+FWD_VELOCITY = tonumber(all_lines[5])
+FWD_STEPS = tonumber(all_lines[6])
+ENTER_VELOCITY = tonumber(all_lines[7])
 
--- variables for alignment
+current_fwd_steps = 0
 MAX_ALIGN_STEPS = 50
 current_align_steps = 0
 MAX_TURN_STEPS = 20 -- 40
-ROTATE_VELOCITY = tonumber(all_lines[2])
 
-new_nest = -1 
-finished = false -- when the robot joined the best room
 
-ALIGN_ANGLE = tonumber(all_lines[3])
-AVOID_DISTANCE = tonumber(all_lines[4])
+
+
 
 
 
