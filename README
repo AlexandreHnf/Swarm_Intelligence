@@ -1,4 +1,8 @@
-nIstructions and Specifications of how to compile, 
+author = ALEXANDRE HENEFFE 
+
+
+
+Istructions and Specifications of how to compile, 
 install and execute the PSO implementation and configure the robot swarm controller:
 =====================================================================================================
 
@@ -28,4 +32,20 @@ install and execute the PSO implementation and configure the robot swarm control
 - The results are shown in terminal and the csv + boxplots files are created in the "Results" file
 
 
+=====================================================================================================
+
+Files : 
+    in Code : 
+        - decision-making1.argos to decision-making10.argos are used for the multiple runs of PSO with threads. Each argos file has a different seed that is the same as the PSO's seed
+        - decision-making.argos has a random seed in it
+        - pso_solution1.lua to pso_solution10.lua are used by the decision-making1.argos to decision-making10.argos, respectively
+        - the pso_solution.lua is used by decision-making.argos
+        - simulation_parameters1.txt to simulation_parameters10.txt are used to store solutions parameters (velocity, etc..) and are used by the pso_solution files
+        - simulation_parameters.txt is used by pso_solution.lua 
+        
+        - decision-making_test.argos is here to test the ultimate solution found by 10 PSO  or the manual solution
+        - decision-making_visual.argos is here to visualize an argos experiment.
+        - manual_solution.lua is the lua file of the initial controller solution (before pso)
+    
+    
 

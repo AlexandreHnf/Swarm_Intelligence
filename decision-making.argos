@@ -45,8 +45,7 @@
       <!-- If you want to execute ARGoS with a script preloaded, use this syntax
            Note: the preloaded script does not appear in the Lua editor! (that's a TODO) -->
       <!-- <params /> -->
-	  <!-- <params script="pso_solution.lua" /> -->
-	  <params script="decision_making7.lua" />
+	  <params script="pso_solution.lua" />
     </lua_controller>
   </controllers>
 
