@@ -14,8 +14,8 @@ def selectBestSol(filename, conv_thresh):
                 pvalue = row[-1]
                 conv = float(row[9])
                 average = sum(evals) / len(evals)
-                print(row)
-                print("average: ", average)
+                # print(row)
+                # print("average: ", average)
 
                 if average < best_sol["avg"] and conv >= 90:
                     best_sol = {"id": i, "sol": sol, "evals": evals, "avg": average, "conv": conv, "pvalue": pvalue}

@@ -1,4 +1,3 @@
-import get_simulation_output as sim 
 from Solution import Solution
 import Utils 
 
