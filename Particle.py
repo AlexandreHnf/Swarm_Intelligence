@@ -61,14 +61,14 @@ class Particle:
 				self.current.setValue(i, self.simulation.getUpperBound(i))
 		
 		self.evaluateSolution()
-		print(self.run_id, " particle {} after move : {} steps".format(self.id, self.current.getEval()))
+		# print(self.run_id, " particle {} after move : {} steps".format(self.id, self.current.getEval()))
 
 
 	def evaluateSolution(self):
 		""" 
 		If the new solution is better than the personal best, update it
 		"""
-		print(self.run_id, " current sol = ", self.current.getValues())
+		# print(self.run_id, " current sol = ", self.current.getValues())
 		new_eval = self.simulation.evaluate(self.current.getValues())
 		self.current.setEval(new_eval)
 		if (self.current.getEval() < self.pbest.getEval()):

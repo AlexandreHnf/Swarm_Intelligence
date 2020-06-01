@@ -19,13 +19,13 @@ ENTER_VELOCITY = [50; 500]
 
 class Simulation:
 
-	def __init__(self, nb_params, run_id, rng):
+	def __init__(self, nb_params, run_id, rng, convergence_threshold):
 		self.rng = rng
 		self.nb_params = nb_params
 		self.lower_bounds = [50, 1, 0.1, 0.01, 1, 5, 50]
 		self.upper_bounds = [1000, 30, 0.5, 0.1, 15, 30, 500]
 		self.threads_values = []
-		self.convergence_limit = 1000 # nb of steps max of a simulation
+		self.convergence_threshold = convergence_threshold # nb of steps max of a simulation
 		self.run_id = run_id
 
 	def getLowerBound(self, i):
@@ -40,11 +40,8 @@ class Simulation:
 	def getRandomX(self, i):
 		"""
 		Get a random number in the range [lower bound, upper bound]
-		/!\ Float values ?, here int for the moment
 		"""
 		if type(self.lower_bounds[i]) == float:
-		# 	return random.uniform(self.lower_bounds[i], self.upper_bounds[i])
-		# return random.randrange(self.lower_bounds[i], self.upper_bounds[i])
 			return self.rng.uniform(self.lower_bounds[i], self.upper_bounds[i])
 		return self.rng.randrange(self.lower_bounds[i], self.upper_bounds[i])
 
@@ -62,7 +59,6 @@ class Simulation:
 			nb_steps = str_output.strip().split("Experiment ends at: \x1b[0m\x1b[1;32m")[1].replace("\x1b[0m\n\x1b[0m", "")
 			return int(nb_steps)  # /!\ ValueError: invalid literal for int() with base 10: ''
 		except:
-			# print("ERROR when simulation : guilty = {}, command = {}, o = {}".format([str_output], argos_command, output.stdout))
 			return "error"
 
 	def run_one_simulation(self):
@@ -90,7 +86,7 @@ class Simulation:
 		print("=========== RESULTS : ")
 		nb_failed = 0
 		for i in range(len(self.threads_values)):
-			if self.threads_values[i] == self.convergence_limit:
+			if self.threads_values[i] == self.convergence_threshold:
 				nb_failed += 1
 			print(f"thread {i} : {self.threads_values[i]} steps")
 		print("=========== AVERAGE : ", sum(self.threads_values) / len(self.threads_values))
@@ -102,27 +98,14 @@ class Simulation:
 		Run n threads and then show the results (average nb of steps over n simulations)
 		"""
 
-		format = "%(asctime)s: %(message)s"
-		logging.basicConfig(format=format, level=logging.INFO,
-							datefmt="%H:%M:%S")
-
-		start_time = time.time()
-
 		threads = list()
 		for index in range(nb_threads):
-			# logging.info("Main    : create and start thread %d.", index)
 			x = threading.Thread(target=self.thread_function, args=(index,))
 			threads.append(x)
 			x.start()
 
 		for index, thread in enumerate(threads):
-			# logging.info("Main    : before joining thread %d.", index)
 			thread.join()
-			# logging.info("Main    : thread %d done", index)
-
-		# self.print_threads_results()
-
-		# Utils.displayTiming(start_time)
 
 		return int(sum(self.threads_values) / len(self.threads_values)) # average nb steps
 
@@ -155,7 +138,7 @@ class Simulation:
 
 		nb_steps = self.run_one_simulation()
 		return nb_steps
-		# return self.run_with_threads(nb_threads)
+
 
 	def evaluateMany(self, solution, nb_threads):
 		"""

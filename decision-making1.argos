@@ -9,7 +9,7 @@
     <system threads="10" />
     <!-- To change the random seed for each experiment repetition, you can set 'random_seed' to whatever value you like -->
     <!-- You can set the maximum time for an experiment by setting lenght to any value you want (in seconds). The value 0 will make argos stop only if there is a consensus of 90%-->
-    <experiment length="100" ticks_per_second="10" random_seed="443" />
+    <experiment length="50" ticks_per_second="10" random_seed="443" />
   </framework>
 
   <!-- ****************** -->

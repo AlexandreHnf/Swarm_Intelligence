@@ -1,12 +1,29 @@
-Instructions and Specifications of how to compile, 
+nIstructions and Specifications of how to compile, 
 install and execute the PSO implementation and configure the robot swarm controller:
+=====================================================================================================
 
-- the language used is Python3 so just install python3 
+- the language used is Python3 so just install python3 and the following libraries : 
 
+    - required python Libraries : 
+        - time
+        - math
+        - threading
+        - csv
+        - random
+        - datetime
+        - ranksums from scipy.stats
+        - subprocess
+        - shlex
+
+        
+=====================================================================================================
 - to run the PSO : 
+
     - first manually set the random seeds in the 10 different decision-making{i}.argos where i is between 1 and 10
     
-    - then, run "python3 pso.py" in terminal
+    - change the seeds in the main() function of main.py
+    
+    - then, run "python3 main.py" in terminal
     
 - The results are shown in terminal and the csv + boxplots files are created in the "Results" file
 
