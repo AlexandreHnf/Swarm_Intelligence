@@ -34,7 +34,7 @@ install and execute the PSO implementation and configure the robot swarm control
 
 =====================================================================================================
 
-Files : 
+Explanation of Files : 
     in Code : 
         - decision-making1.argos to decision-making10.argos are used for the multiple runs of PSO with threads. Each argos file has a different seed that is the same as the PSO's seed
         - decision-making.argos has a random seed in it

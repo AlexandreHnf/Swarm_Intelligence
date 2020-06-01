@@ -1,7 +1,7 @@
 import csv
 
 def selectBestSol(filename, conv_thresh):
-    best_sol = {"id": 0, "sol": 0, "evals": [], "avg": 100000, "conv": 0,"pvalue": 0, "conv_pvalue": 0}  # best
+    best_sol = {"id": 0, "sol": 0, "evals": [], "avg": 100000, "conv": 0,"pvalue": 0}  # best
 
     with open(filename) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=",")
@@ -9,18 +9,16 @@ def selectBestSol(filename, conv_thresh):
 
         for row in csv_reader:
             if i != 0 : # if not names
-                sol = int(row[0])
-                evals = [int(e) for e in row[1][1:-1].split(",") if (int(e) < conv_thresh)]
-                pvalue = float(row[-2])
-                conv_pvalue = float(row[-1])
-                conv = float(row[2])
-                # print(evals)
+                sol = int(row[7])
+                evals = [int(e) for e in row[8][1:-1].split(",") if (int(e) < conv_thresh)]
+                pvalue = row[-1]
+                conv = float(row[9])
                 average = sum(evals) / len(evals)
                 print(row)
                 print("average: ", average)
 
                 if average < best_sol["avg"] and conv >= 90:
-                    best_sol = {"id": i, "sol": sol, "evals": evals, "avg": average, "conv": conv, "pvalue": pvalue, "conv_pvalue": conv_pvalue}
+                    best_sol = {"id": i, "sol": sol, "evals": evals, "avg": average, "conv": conv, "pvalue": pvalue}
 
             i += 1
 
@@ -28,13 +26,13 @@ def selectBestSol(filename, conv_thresh):
 
 def selectBestPhis(conv_thresh):
     phis = [(1,1), (0,1), (1,0), (1,2), (2,1), (0.5,3), (3,0.5)]
-    filenames = ["Results/stat10_10_10_20_1_1_2020-06-01 17:37:19.673179.csv",
-                 "Results/stat10_10_10_20_0_1_2020-06-01 17:43:01.113775.csv",
-                 "Results/stat10_10_10_20_1_0_2020-06-01 17:48:25.044962.csv",
-                 "Results/stat10_10_10_20_1_2_2020-06-01 17:52:37.832200.csv",
-                 "Results/stat10_10_10_20_2_1_2020-06-01 17:58:41.295725.csv",
-                 "Results/stat10_10_10_20_0.5_3_2020-06-01 18:04:32.152520.csv",
-                 "Results/stat10_10_10_20_3_0.5_2020-06-01 18:10:23.641877.csv"
+    filenames = ["../Results/pso-wt-10_10_10_20_1_1_2020-06-01 20:26:09.898600.csv",
+                 "../Results/pso-wt-10_10_10_20_0_1_2020-06-01 20:29:44.871141.csv",
+                 "../Results/pso-wt-10_10_10_20_1_0_2020-06-01 20:34:15.171368.csv",
+                 "../Results/pso-wt-10_10_10_20_1_2_2020-06-01 20:38:25.227213.csv",
+                 "../Results/pso-wt-10_10_10_20_2_1_2020-06-01 20:41:58.325743.csv",
+                 "../Results/pso-wt-10_10_10_20_0.5_3_2020-06-01 20:46:41.536688.csv",
+                 "../Results/pso-wt-10_10_10_20_3_0.5_2020-06-01 20:50:37.491889.csv"
                  ]
 
     ultimate_best_sol = None

@@ -66,6 +66,9 @@ class ParticleSwarmOpti:
 
 	
 	def createGbestTopology(self):
+		"""
+		Fully-connected graph topology
+		"""
 		for i in range(self.nb_particles):
 			for j in range(self.nb_particles):
 				if (i!=j):

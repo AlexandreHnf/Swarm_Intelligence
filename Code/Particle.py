@@ -42,6 +42,10 @@ class Particle:
 		self.evaluateSolution()
 
 	def move(self):
+		"""
+		Update the current solution based on personal best sol and global sol depending
+		on phi1 and phi2 parameters
+		"""
 		self.findGbestParticle() # the global best depends on the topology
 
 		for i in range(self.size):

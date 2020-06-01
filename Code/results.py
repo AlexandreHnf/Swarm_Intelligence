@@ -14,29 +14,29 @@ import matplotlib.pyplot as plt
 
 
 def ranksumTest(evals, convergence_threshold):
+    """
+    Wilcoxon Ranksum test with each pair of solutions of the 10 runs of PSo
+    """
     p_values = []
-    conv_pvalues = []
-    sol_evals = []
-    for i in range(len(evals) - 1):
-        sol_evals.append(evals[i][0])  # sol eval)
-        x = [evals[i][0]]  # sol eval
-        y = evals[i][1]  # sol list of evaluations
-        conv_y = list(filter(lambda a: a != convergence_threshold, y))
-        p_values.append(ranksums(x, y))
-        conv_pvalues.append(ranksums(x, conv_y))
 
-    total_p_value = ranksums(sol_evals, evals["all_evals"])
+    for i in range(len(evals)- 1):
+        p_vals = []
+        for j in range(len(evals)-1):
+            if i == j :
+                p_vals.append("-")
+            else:
+                x = evals[i][1]  # list of evals
+                y = evals[j][1]    # list of evals
+                p_vals.append(ranksums(x, y).pvalue)
+        p_values.append(p_vals)
 
-    only_convergence = list(filter(lambda a: a != convergence_threshold, evals["all_evals"]))
-    # print(only_convergence)
-    tot_conv_pvalue = ranksums(sol_evals, only_convergence)
-    p_values.append(total_p_value)
-    conv_pvalues.append(tot_conv_pvalue)
-
-    return p_values, conv_pvalues
+    return p_values # table of pvalues
 
 
 def boxplots(evals, phi1, phi2, nb_evals):
+    """
+    Save boxplots of all evaluations
+    """
     medians = []
     y = []
     for i in range(len(evals) - 1):
@@ -52,11 +52,14 @@ def boxplots(evals, phi1, phi2, nb_evals):
     ax.set_title("10PSO, 10it, 10particles, "
                  "phi1={}, phi2={}, nb evals={}".format(phi1, phi2, nb_evals))
 
-    plt.savefig("Results/boxplot10_10_10_{}_{}_{}_{}.png"
+    plt.savefig("../Results/pso-bxp-10_10_10_{}_{}_{}_{}.png"
                 .format(nb_evals, phi1, phi2, datetime.today()))
 
 
 def boxplotsConv(evals, convergence_threshold, phi1, phi2, nb_evals):
+    """
+    save the boxplots of the evaluations but with only convergence
+    """
     medians = []
     y = []
     for i in range(len(evals) - 1):
@@ -76,11 +79,14 @@ def boxplotsConv(evals, convergence_threshold, phi1, phi2, nb_evals):
     ax.set_title("10PSO, 10it, 10particles, "
                  "phi1={}, phi2={}, nb evals={}".format(phi1, phi2, nb_evals))
 
-    plt.savefig("Results/boxplotCONV10_10_10_{}_{}_{}_{}.png"
+    plt.savefig("../Results/boxplotCONV10_10_10_{}_{}_{}_{}.png"
                 .format(nb_evals, phi1, phi2, datetime.today()))
 
 
 def getAllEvals2(best_solutions, nb_params, nb_evals, conv_thresh):
+    """
+    Get all evaluations but with lists and not Solution objects
+    """
 
     start_time = time.time()
     e = {"all_evals": []}
@@ -95,6 +101,7 @@ def getAllEvals2(best_solutions, nb_params, nb_evals, conv_thresh):
 
 def getAllEvals(best_solutions, nb_params, nb_evals, conv_thresh):
     """
+    Get all evaluations of 10 PSO runs with Solution objects
 	e = {0: (sol1_eval, evaluations), 1 : (sol2_eval, evaluations), .. "tot": [all_evals]}
 	"""
     start_time = time.time()
@@ -115,44 +122,34 @@ def displayBestSol(best_solutions):
         print(f"({sol.getValues()}, {sol.getEval()}),")
 
 
-def displayEvals(evals, p_values, conv_pvalues):
+def displayEvals(evals, p_values):
     print("=============== EVALS with PVALUES: ")
     print("all evals : {}".format(evals["all_evals"]))
 
-    print("global p_value with non convergence: ", p_values[-1].pvalue)
-    print("global p_value without non convergence: ", conv_pvalues[-1].pvalue)
-
     for i in range(len(evals) - 1):
-        print("sol = {}, evals = {}, pvalue = {}, conv_pvalue = {}".
-              format(evals[i][0], evals[i][1], p_values[i].pvalue, conv_pvalues[i].pvalue))
+        print("sol = {}, evals = {}, pvalue = {}".
+              format(evals[i][0], evals[i][1], p_values[i]))
 
 
-def writeSolToCsv(best_solutions, phi1, phi2, nb_evals):
-    filename = "Results/pso10_10_10_{}_{}_{}_{}.csv".format(nb_evals, phi1, phi2, datetime.today())
+def writeTestToCsv(best_solutions, p_values, evals, phi1, phi2, nb_evals, conv_thresh):
+    """
+    Write all values in csv file
+    """
+    filename = "../Results/pso-wt-10_10_10_{}_{}_{}_{}.csv".format(nb_evals, phi1, phi2, datetime.today())
     with open(filename, mode='w') as result_file:
         result_writer = csv.writer(result_file, delimiter=',', quotechar='"')
         data_names = ["enter_deep_velocity", "rotate_velocity", "align_angle", "avoid_distance",
-                      "fwd_velocity", "fwd_steps", "enter_velocity", "nb_steps"]
-        result_writer.writerow(data_names)
-        for sol in best_solutions:
-            # line = sol.getValues()
-            # line.append(sol.getEval())
-            line = sol[0]
-            line.append(sol[1])
-            result_writer.writerow(line)
-
-
-def writeStatsToCsv(evals, p_values, conv_pvalues, phi1, phi2, nb_evals, conv_thresh):
-    filename = "Results/stat10_10_10_{}_{}_{}_{}.csv".format(nb_evals, phi1, phi2, datetime.today())
-    with open(filename, mode='w') as result_file:
-        result_writer = csv.writer(result_file, delimiter=',', quotechar='"')
-        data_names = ["Solution", "Evaluations", "convergence(%)", "pvalue", "conv_pvalue"]
+                      "fwd_velocity", "fwd_steps", "enter_velocity", "nb_steps", "Evaluations", "convergence(%)", "pvalues"]
         result_writer.writerow(data_names)
         for i in range(len(evals) - 1):
-            line = [evals[i][0]]  # 1 sol eval
+            # line = best_solutions[i].getValues()
+            # line.append(best_solutions[i].getEval())
+            line = best_solutions[i][0]
+            line.append(best_solutions[i][1])
+
             line.append(evals[i][1])  # n evals
             convergence = ((nb_evals - evals[i][1].count(conv_thresh)) / nb_evals) * 100
             line.append(convergence)
-            line.append(p_values[i].pvalue)
-            line.append(conv_pvalues[i].pvalue)
+            line.append(p_values[i])
+
             result_writer.writerow(line)
